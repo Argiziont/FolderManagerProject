@@ -1,17 +1,19 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import AddData from "./RESTDataManagment";
+import PropTypes from "prop-types";
 
-export function DataForm() {
+function DataForm({ UpdateData }) {
   const { register, handleSubmit, errors } = useForm();
-  const onSubmit = (data) => {
-    alert(JSON.stringify(data));
-    //AddPhone(data);
+  const onSubmit = async (data, e) => {
+    await AddData((data = { data }), (UpdateData = { UpdateData }));
+    e.target.reset();
   };
   return (
     <div className="App">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <label htmlFor="Name">File Name</label>
+          <label htmlFor="Name">Folder Name</label>
           <input
             name="Name"
             placeholder="bill"
@@ -20,8 +22,15 @@ export function DataForm() {
         </div>
         {errors.Name && <span>This field is required</span>}
         <br></br>
-        <button type="submit">Submit</button>
+        <button type="submit" className="btn btn-primary">
+          Add
+        </button>
       </form>
     </div>
   );
 }
+
+DataForm.propTypes = {
+  UpdateData: PropTypes.func.isRequired,
+};
+export default DataForm;

@@ -1,23 +1,17 @@
 import React, { Component } from "react";
-import { DataForm } from "./DataForm";
-//import { loadData } from "./RESTReqs";
+import DataForm from "./DataForm";
+import { loadData } from "./RESTDataManagment";
 export class FetchData extends Component {
   static displayName = FetchData.name;
 
   constructor(props) {
     super(props);
     this.state = { folders: [], loading: true };
-    this.AddData = this.AddData.bind(this);
+    this.updateData = this.updateData.bind(this);
   }
 
-  componentDidMount() {
-    //const { data } = loadData();
-    this.loadData();
-    alert(JSON.stringify(this.state.folders));
-    //this.setState({
-    //  folders: data,
-    //  loading: false,
-    //});
+  async componentDidMount() {
+    await this.updateData();
   }
 
   static renderFoldersTable(folders) {
@@ -39,7 +33,6 @@ export class FetchData extends Component {
             ))}
           </tbody>
         </table>
-        <DataForm AddPhone={this.AddPhone} />
       </div>
     );
   }
@@ -56,35 +49,14 @@ export class FetchData extends Component {
       <div>
         <h1 id="tabelLabel">Folders List</h1>
         {contents}
-        <button className="btn btn-primary" onClick={this.AddData}>
-          ADD
-        </button>
+        <DataForm UpdateData={async () => await this.updateData()} />
       </div>
     );
   }
-
-  async loadData() {
-    const response = await fetch("Folder");
-    const data = await response.json();
-    this.setState({ folders: data, loading: false });
-  }
-
-  async AddData(data) {
-    let Senddata = {
-      //Name: data.Name,
-      Name: "data.Name",
-      File: null,
-    };
-    fetch("https://localhost:44396/Folder", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(Senddata),
-    }).then((r) =>
-      r.json().then((res) => {
-        if (res) {
-          this.loadData();
-        }
-      })
-    );
+  async updateData() {
+    this.setState({
+      folders: await loadData(),
+      loading: false,
+    });
   }
 }
