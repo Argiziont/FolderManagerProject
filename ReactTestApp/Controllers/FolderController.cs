@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ReactTestApp.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ReactTestApp.Controllers
 {
@@ -36,10 +34,27 @@ namespace ReactTestApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(Folder folder)
+        public IActionResult PostFolder(Folder folder)
         {
-            folder.Id = FolderSummary.LastOrDefault().Id + 1;
+            folder.Id = FolderSummary.Count > 0 ? FolderSummary.LastOrDefault().Id + 1 : 1;
             FolderSummary.Add(folder);
+            return Ok(folder);
+        }
+        [HttpDelete("{id}")]
+        public IActionResult DeleteFolder(int id)
+        {
+
+            var folder = FolderSummary.ElementAt(id - 1);
+            if (folder == null)
+            {
+                return NotFound();
+            }
+            FolderSummary.Remove(folder);
+            for (int i = 0; i < FolderSummary.Count; i++)
+            {
+                FolderSummary[i].Id = i + 1;
+            }
+
             return Ok(folder);
         }
     }

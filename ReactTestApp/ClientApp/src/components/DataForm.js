@@ -1,31 +1,31 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import AddData from "./RESTDataManagment";
+import { AddData } from "./RESTDataManagment";
 import PropTypes from "prop-types";
+import Button from "@material-ui/core/Button";
 
 function DataForm({ UpdateData }) {
   const { register, handleSubmit, errors } = useForm();
   const onSubmit = async (data, e) => {
-    await AddData((data = { data }), (UpdateData = { UpdateData }));
+    await AddData(data, UpdateData);
     e.target.reset();
   };
   return (
     <div className="App">
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label htmlFor="Name">Folder Name</label>
-          <input
-            name="Name"
-            placeholder="bill"
-            ref={register({ required: true })}
-          />
-        </div>
-        {errors.Name && <span>This field is required</span>}
-        <br></br>
-        <button type="submit" className="btn btn-primary">
-          Add
-        </button>
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+        <input
+          name="Name"
+          placeholder="bill"
+          ref={register({
+            required: true,
+          })}
+        />
+        &nbsp;
+        <Button name="SubmitButton" color="primary" type="submit">
+          Send
+        </Button>
       </form>
+      {errors.Name && <span> This field is required </span>}
     </div>
   );
 }
