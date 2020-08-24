@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
 import Avatar from "@material-ui/core/Avatar";
@@ -14,8 +13,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import StarBorder from "@material-ui/icons/StarBorder";
-import FileCopyIcon from "@material-ui/icons/FileCopy";
+import FilesList from "./FilesList";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -61,13 +59,11 @@ export default function InteractiveList({ FolderName, DeleteHandler }) {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
+
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem className={classes.nested}>
-                    <ListItemIcon>
-                      <FileCopyIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="None" />
+                    <FilesList></FilesList>
                   </ListItem>
                 </List>
               </Collapse>
