@@ -10,6 +10,7 @@ async function AddData(data, UpdateData) {
   const Senddata = {
     Name: data.Name,
     File: null,
+    TmpFileNames: null,
   };
   await fetch("https://localhost:44396/Folder", {
     method: "POST",

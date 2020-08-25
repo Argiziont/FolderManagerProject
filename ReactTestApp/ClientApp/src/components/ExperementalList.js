@@ -14,6 +14,7 @@ import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import FilesList from "./FilesList";
+import ClearIcon from "@material-ui/icons/Clear";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,10 +26,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function InteractiveList({ FolderName, DeleteHandler }) {
+export default function InteractiveList({
+  FolderName,
+  FilesNamesArray,
+  DeleteHandler,
+}) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-
+  const arr = FilesNamesArray;
   const handleClick = () => {
     setOpen(!open);
   };
@@ -47,9 +52,16 @@ export default function InteractiveList({ FolderName, DeleteHandler }) {
                 </ListItemAvatar>
                 <ListItemText primary={FolderName} />
                 <ListItemSecondaryAction>
-                  <IconButton onClick={handleClick} aria-label="expand">
-                    {open ? <ExpandLess /> : <ExpandMore />}
-                  </IconButton>
+                  {FilesNamesArray != null && FilesNamesArray.length > 0 ? (
+                    <IconButton onClick={handleClick} aria-label="expand">
+                      {open ? <ExpandLess /> : <ExpandMore />}
+                    </IconButton>
+                  ) : (
+                    <IconButton>
+                      <ClearIcon />
+                    </IconButton>
+                  )}
+
                   <IconButton
                     onClick={DeleteHandler}
                     edge="end"
@@ -59,11 +71,10 @@ export default function InteractiveList({ FolderName, DeleteHandler }) {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
-
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem className={classes.nested}>
-                    <FilesList></FilesList>
+                    <FilesList FilesNamesArray={FilesNamesArray}></FilesList>
                   </ListItem>
                 </List>
               </Collapse>

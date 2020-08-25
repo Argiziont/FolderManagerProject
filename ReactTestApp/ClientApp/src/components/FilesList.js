@@ -6,14 +6,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { FixedSizeList } from "react-window";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    height: 200,
-    maxWidth: 300,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
 
 const itemsArray = [
   { name: "Drake" },
@@ -31,13 +23,12 @@ const itemsArray = [
 
 function renderRow(props) {
   const { index, style, data } = props;
-
   return (
     <ListItem button style={style} key={index}>
       <ListItemIcon>
         <FileCopyIcon />
       </ListItemIcon>
-      <ListItemText primary={data.itemsArray[index].name} />
+      <ListItemText primary={data.itemsArray[index]} />
     </ListItem>
   );
 }
@@ -47,7 +38,16 @@ renderRow.propTypes = {
   style: PropTypes.object.isRequired,
 };
 
-export default function FilesList() {
+export default function FilesList({ FilesNamesArray }) {
+  const useStyles = makeStyles((theme) => ({
+    root: {
+      width: "100%",
+      height: 40 * FilesNamesArray.length,
+      maxWidth: 300,
+      backgroundColor: theme.palette.background.paper,
+    },
+  }));
+
   const classes = useStyles();
   return (
     <div className={classes.root}>
@@ -55,8 +55,8 @@ export default function FilesList() {
         height={200}
         width={300}
         itemSize={46}
-        itemCount={itemsArray.length}
-        itemData={{ itemsArray: itemsArray }}
+        itemCount={FilesNamesArray.length}
+        itemData={{ itemsArray: FilesNamesArray }}
       >
         {renderRow}
       </FixedSizeList>

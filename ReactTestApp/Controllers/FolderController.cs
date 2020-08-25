@@ -11,10 +11,11 @@ namespace ReactTestApp.Controllers
     public class FolderController : ControllerBase
     {
         private static List<Folder> FolderSummary = new List<Folder> {
-            new Folder {Id=1,Name="Pictures",Files=null },
-            new Folder {Id=2,Name="Music",Files=null },
-            new Folder {Id=3,Name="Documents",Files=null },
-            new Folder {Id=4,Name="Other Files",Files=null },
+            new Folder {Id=1,Name="Pictures",Files=null,TmpFileNames=new string[] { "red.png", "purple.jpg", "green.exe" } },
+            new Folder {Id=2,Name="Music",Files=null,TmpFileNames=new string[] { "Zack.pg", "Files.ini" } },
+            new Folder {Id=3,Name="Documents",Files=null,TmpFileNames=new string[] { "Elis.exe" } },
+            new Folder {Id=4,Name="Other Files",Files=null,TmpFileNames=new string[] { "red.png", "Open.exp", "colors.ini" } },
+            new Folder {Id=5,Name="My files",Files=null,},
             };
         private readonly ILogger<FolderController> _logger;
 

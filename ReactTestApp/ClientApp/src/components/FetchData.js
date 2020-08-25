@@ -28,6 +28,7 @@ export class FetchData extends Component {
           <InteractiveList
             key={folder.id}
             FolderName={folder.name}
+            FilesNamesArray={folder.tmpFileNames}
             DeleteHandler={async () =>
               await DeleteFolder(folder.id, () => UpdateFoldedData())
             }
