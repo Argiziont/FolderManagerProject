@@ -9,7 +9,6 @@ namespace ReactTestApp.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string[] TmpFileNames{ get; set; }
         public List<FileHolder> Files { get; set; }
     }
 }

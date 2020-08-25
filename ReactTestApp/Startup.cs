@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ReactTestApp.Models;
+using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.EntityFrameworkCore;
 
 namespace ReactTestApp
 {
@@ -19,7 +22,9 @@ namespace ReactTestApp
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            string connectionString = Configuration.GetConnectionString("FolderFiles");
+            services.AddDbContext<ApplicationDbContext>(options =>
+               options.UseSqlServer(connectionString));
             services.AddControllersWithViews();
 
             services.AddSpaStaticFiles(configuration =>

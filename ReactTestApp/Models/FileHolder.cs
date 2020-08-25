@@ -7,6 +7,10 @@ namespace ReactTestApp.Models
 {
     public class FileHolder
     {
-        //TODO
+        public int Id { get; set; }
+        public string Name { get; set; }
+        //public byte[] File { get; set; }
+        public int FolderId { get; set; }
+        public Folder Folder { get; set; } 
     }
 }

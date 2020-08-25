@@ -26,11 +26,11 @@ export class FetchData extends Component {
       <div>
         {folders.map((folder) => (
           <InteractiveList
-            key={folder.id}
-            FolderName={folder.name}
-            FilesNamesArray={folder.tmpFileNames}
+            key={folder.item1}
+            FolderName={folder.item2}
+            FilesNamesArray={folder.item3}
             DeleteHandler={async () =>
-              await DeleteFolder(folder.id, () => UpdateFoldedData())
+              await DeleteFolder(folder.item1, () => UpdateFoldedData())
             }
           ></InteractiveList>
         ))}
