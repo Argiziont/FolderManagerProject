@@ -13,13 +13,6 @@ namespace ReactTestApp.Controllers
     {
         private ApplicationDbContext db;
 
-        private static List<Folder> FolderSummary = new List<Folder> {
-            new Folder {Id=0,Name="Pictures", Files=new List<FileHolder>{new FileHolder{ Id=0,Name="red.png"}, new FileHolder { Id = 1, Name = "purple.jpg" }, new FileHolder { Id = 2, Name = "green.exe" } } },
-            new Folder {Id=1,Name="Music",Files=new List<FileHolder>{new FileHolder{ Id=0,Name= "Zack.pg" }, new FileHolder { Id = 1, Name = "Files.ini" } } },
-            new Folder {Id=2,Name="Documents",Files=new List<FileHolder>{new FileHolder{ Id=0,Name= "Elis.exe" } } },
-            new Folder {Id=3,Name="Other Files",Files=new List<FileHolder>{new FileHolder{ Id=0,Name="red.png"}, new FileHolder { Id = 1, Name = "Open.exp" }, new FileHolder { Id = 2, Name = "colors.ini" } } },
-            new Folder {Id=4,Name="My files",Files=null,},
-            };
         private readonly ILogger<FolderController> _logger;
 
         public FolderController(ILogger<FolderController> logger, ApplicationDbContext context)

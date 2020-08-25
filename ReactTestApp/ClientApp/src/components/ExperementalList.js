@@ -15,6 +15,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import FilesList from "./FilesList";
 import ClearIcon from "@material-ui/icons/Clear";
+import AddIcon from "@material-ui/icons/Add";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
   },
   demo: {
     backgroundColor: theme.palette.background.paper,
+  },
+  input: {
+    display: "none",
   },
 }));
 
@@ -52,6 +56,27 @@ export default function InteractiveList({
                 </ListItemAvatar>
                 <ListItemText primary={FolderName} />
                 <ListItemSecondaryAction>
+                  <input
+                    className={classes.input}
+                    id="icon-button-file"
+                    type="file"
+                    onChange={(event) => {
+                      const formData = new FormData();
+                      formData.append(
+                        "myFile",
+                        event.target.files[0],
+                        event.target.files[0].name
+                      );
+                      console.log(event.target.files[0]);
+                      console.log(formData);
+                    }}
+                  />
+                  <label htmlFor="icon-button-file">
+                    <IconButton aria-label="upload picture" component="span">
+                      <AddIcon />
+                    </IconButton>
+                  </label>
+
                   {FilesNamesArray != null && FilesNamesArray.length > 0 ? (
                     <IconButton onClick={handleClick} aria-label="expand">
                       {open ? <ExpandLess /> : <ExpandMore />}
