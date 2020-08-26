@@ -16,7 +16,8 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import FilesList from "./FilesList";
 import ClearIcon from "@material-ui/icons/Clear";
 import AddIcon from "@material-ui/icons/Add";
-
+import Button from "@material-ui/core/Button";
+import axios from "axios";
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -32,14 +33,40 @@ const useStyles = makeStyles((theme) => ({
 
 export default function InteractiveList({
   FolderName,
+  FolderId,
   FilesNamesArray,
   DeleteHandler,
+  UpdateHandler,
 }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  const arr = FilesNamesArray;
+  const [firstName, setFirstName] = React.useState("");
+  //const arr = FilesNamesArray;
   const handleClick = () => {
     setOpen(!open);
+  };
+  const handleUpdate = (event) => {
+    const formData = new FormData();
+    if (event.target.files != undefined) {
+      formData.append(
+        "sendFile",
+        event.target.files[0],
+        event.target.files[0].name
+      );
+
+      formData.append("Id", FolderId);
+
+      // Details of the uploaded file
+
+      // Request made to the backend api
+      // Send formData object
+      const config = {
+        headers: { "content-type": "multipart/form-data" },
+      };
+      axios.post("FileHolder", formData, config);
+
+      UpdateHandler();
+    }
   };
 
   return (
@@ -56,26 +83,18 @@ export default function InteractiveList({
                 </ListItemAvatar>
                 <ListItemText primary={FolderName} />
                 <ListItemSecondaryAction>
-                  <input
-                    className={classes.input}
-                    id="icon-button-file"
-                    type="file"
-                    onChange={(event) => {
-                      const formData = new FormData();
-                      formData.append(
-                        "myFile",
-                        event.target.files[0],
-                        event.target.files[0].name
-                      );
-                      console.log(event.target.files[0]);
-                      console.log(formData);
-                    }}
-                  />
-                  <label htmlFor="icon-button-file">
-                    <IconButton aria-label="upload picture" component="span">
-                      <AddIcon />
-                    </IconButton>
-                  </label>
+                  <Button
+                    size="medium"
+                    component="label"
+                    startIcon={<AddIcon />}
+                  >
+                    <input
+                      onChange={handleUpdate}
+                      onClick={UpdateHandler}
+                      type="file"
+                      className={classes.input}
+                    />
+                  </Button>
 
                   {FilesNamesArray != null && FilesNamesArray.length > 0 ? (
                     <IconButton onClick={handleClick} aria-label="expand">

@@ -20,7 +20,6 @@ namespace ReactTestApp.Controllers
             db = context;
 
             _logger = logger;
-
             //var folder0 = db.Folders.ToList()[0];
             //var folder1 = db.Folders.ToList()[1];
             //var folder2 = db.Folders.ToList()[2];

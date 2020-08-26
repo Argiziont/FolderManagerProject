@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -25,13 +26,25 @@ namespace ReactTestApp.Controllers
 
         }
         [HttpPost]
-        public IActionResult PostFile(IFormCollection Data)
+        public IActionResult PostFile(IFormCollection Data, IFormFile sendFile) 
         {
-            ////folder.Id = FolderSummary.Count > 0 ? FolderSummary.LastOrDefault().Id+1 : 0;
+            if (sendFile!=null)
+            {
+                int key = Convert.ToInt32(Data["id"]);
+                Folder folder = db.Folders.Find(key);
+                FileHolder uplodadedFile = new FileHolder { Name = sendFile.FileName, Folder = folder, Size = sendFile.Length };
 
-            //db.Folders.Add(folder);
-            //db.SaveChanges();
-            return Ok();
+                byte[] fileData = null;
+                using (var binaryReader = new BinaryReader(sendFile.OpenReadStream()))
+                {
+                    fileData = binaryReader.ReadBytes((int)sendFile.Length);
+                }
+                uplodadedFile.File = fileData;
+                db.Files.Add(uplodadedFile);
+                db.SaveChanges();
+                return Ok();
+            }
+            return NotFound();
         }
     }
 }

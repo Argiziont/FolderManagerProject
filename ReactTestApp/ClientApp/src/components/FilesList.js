@@ -42,7 +42,7 @@ export default function FilesList({ FilesNamesArray }) {
   const useStyles = makeStyles((theme) => ({
     root: {
       width: "100%",
-      height: 40 * FilesNamesArray.length,
+      height: FilesNamesArray.length < 10 ? 40 * FilesNamesArray.length : 400,
       maxWidth: 300,
       backgroundColor: theme.palette.background.paper,
     },

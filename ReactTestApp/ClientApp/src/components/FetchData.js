@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import DataForm from "./DataForm";
 import { loadData, DeleteFolder } from "./RESTDataManagment";
 //import {  } from "./RESTDataManagment";
-import axios from "axios";
 import InteractiveList from "./ExperementalList";
 
 export class FetchData extends Component {
@@ -29,9 +28,11 @@ export class FetchData extends Component {
             key={folder.item1}
             FolderName={folder.item2}
             FilesNamesArray={folder.item3}
+            FolderId={folder.item1}
             DeleteHandler={async () =>
               await DeleteFolder(folder.item1, () => UpdateFoldedData())
             }
+            UpdateHandler={() => UpdateFoldedData()}
           ></InteractiveList>
         ))}
       </div>
@@ -54,9 +55,6 @@ export class FetchData extends Component {
         <h1 id="tabelLabel"> Folders List </h1> {contents}
         <DataForm UpdateData={async () => await this.updateData()} />
         <h3>File Upload using React!</h3>
-        <div>
-          <input type="file" onChange={this.onFileChange} />
-        </div>
       </div>
     );
   }
@@ -66,25 +64,4 @@ export class FetchData extends Component {
       loading: false,
     });
   }
-  // On file select (from the pop up)
-  onFileChange = (event) => {
-    const formData = new FormData();
-
-    // Update the formData object
-    formData.append(
-      "myFile",
-      event.target.files[0],
-      event.target.files[0].name
-    );
-    formData.append("Id", 10);
-
-    // Details of the uploaded file
-
-    // Request made to the backend api
-    // Send formData object
-    axios.post("FileHolder", formData);
-
-    this.updateData();
-  };
-  send() {}
 }
