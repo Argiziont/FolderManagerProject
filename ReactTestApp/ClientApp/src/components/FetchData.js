@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import DataForm from "./DataForm";
-import { loadData, DeleteFolder } from "./RESTDataManagment";
+import { loadData, DeleteFolder, DeleteFile } from "./RESTDataManagment";
 //import {  } from "./RESTDataManagment";
 import InteractiveList from "./ExperementalList";
 
@@ -28,6 +28,7 @@ export class FetchData extends Component {
             key={folder.item1}
             FolderName={folder.item2}
             FilesNamesArray={folder.item3}
+            FilesIdsArray={folder.item4}
             FolderId={folder.item1}
             DeleteHandler={async () =>
               await DeleteFolder(folder.item1, () => UpdateFoldedData())

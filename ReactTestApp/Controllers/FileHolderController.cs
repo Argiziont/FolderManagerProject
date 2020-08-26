@@ -46,5 +46,19 @@ namespace ReactTestApp.Controllers
             }
             return NotFound();
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteFile(int id)
+        {
+
+            FileHolder file = db.Files.Find(id);
+            if (file == null)
+            {
+                return NotFound();
+            }
+            db.Files.Remove(file);
+            db.SaveChanges();
+            return Ok(file);
+        }
     }
 }

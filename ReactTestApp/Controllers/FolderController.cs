@@ -20,6 +20,8 @@ namespace ReactTestApp.Controllers
             db = context;
 
             _logger = logger;
+
+            #region standartValues
             //var folder0 = db.Folders.ToList()[0];
             //var folder1 = db.Folders.ToList()[1];
             //var folder2 = db.Folders.ToList()[2];
@@ -39,14 +41,13 @@ namespace ReactTestApp.Controllers
             //db.Folders.AddRange(folder0, folder1, folder2, folder3, folder4);
 
             //db.SaveChanges();
+            #endregion
+
         }
         [HttpGet]
-        public IEnumerable<Tuple<int, string, List<string>>> Get()
+        public IEnumerable<Tuple<int,string,List<string>,List<int>>> Get()
         {
-            //var t = db.Folders.ToList()[4];
-            //var z= t.Files==null?null : t.Files.Select(u => u.Name).ToList();
-
-            return db.Folders.Select(x => new Tuple<int, string, List<string>>(x.Id, x.Name, x.Files.Select(u => u.Name).ToList())).ToList();
+            return db.Folders.Select(x => new Tuple<int, string, List<string>, List<int>>(x.Id, x.Name, x.Files.Select(u => u.Name).ToList(), x.Files.Select(u => u.Id).ToList())).ToList();
         }
         [HttpGet("{id}")]
         public Folder Get(int id)

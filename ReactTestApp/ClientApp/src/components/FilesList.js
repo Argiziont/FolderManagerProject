@@ -6,29 +6,45 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { FixedSizeList } from "react-window";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
-
-const itemsArray = [
-  { name: "Drake" },
-  { name: "Halsey" },
-  { name: "Camillo Cabello" },
-  { name: "Travis Scott" },
-  { name: "Bazzi" },
-  { name: "Flume" },
-  { name: "Nicki Minaj" },
-  { name: "Kodak Black" },
-  { name: "Tyga" },
-  { name: "Buno Mars" },
-  { name: "Lil Wayne" },
-];
+import DeleteIcon from "@material-ui/icons/Delete";
+import IconButton from "@material-ui/core/IconButton";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import { DeleteFile } from "./RESTDataManagment";
 
 function renderRow(props) {
+  const handleDelete = () => {
+    console.log(data.idsArray[index]);
+    DeleteFile(data.idsArray[index], () => data.UpdateHandler());
+  };
   const { index, style, data } = props;
   return (
     <ListItem button style={style} key={index}>
       <ListItemIcon>
         <FileCopyIcon />
       </ListItemIcon>
-      <ListItemText primary={data.itemsArray[index]} />
+
+      <ListItemSecondaryAction>
+        <IconButton
+          onClick={handleDelete}
+          size="small"
+          edge="end"
+          aria-label="delete"
+        >
+          <DeleteIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+      <ListItemText
+        primary={
+          data.itemsArray[index].length > 15
+            ? data.itemsArray[index].substring(0, 7) +
+              " . . . " +
+              data.itemsArray[index].substring(
+                data.itemsArray[index].length - 7,
+                data.itemsArray[index].length
+              )
+            : data.itemsArray[index]
+        }
+      />
     </ListItem>
   );
 }
@@ -38,12 +54,16 @@ renderRow.propTypes = {
   style: PropTypes.object.isRequired,
 };
 
-export default function FilesList({ FilesNamesArray }) {
+export default function FilesList({
+  FilesNamesArray,
+  UpdateHandler,
+  FilesIdsArray,
+}) {
   const useStyles = makeStyles((theme) => ({
     root: {
       width: "100%",
-      height: FilesNamesArray.length < 10 ? 40 * FilesNamesArray.length : 400,
-      maxWidth: 300,
+      height: FilesNamesArray.length <= 7 ? 40 * FilesNamesArray.length : 400,
+      maxWidth: 400,
       backgroundColor: theme.palette.background.paper,
     },
   }));
@@ -52,11 +72,15 @@ export default function FilesList({ FilesNamesArray }) {
   return (
     <div className={classes.root}>
       <FixedSizeList
-        height={200}
-        width={300}
+        height={400}
+        width={400}
         itemSize={46}
         itemCount={FilesNamesArray.length}
-        itemData={{ itemsArray: FilesNamesArray }}
+        itemData={{
+          itemsArray: FilesNamesArray,
+          idsArray: FilesIdsArray,
+          UpdateHandler: UpdateHandler,
+        }}
       >
         {renderRow}
       </FixedSizeList>

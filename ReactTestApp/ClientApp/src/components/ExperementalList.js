@@ -37,17 +37,17 @@ export default function InteractiveList({
   FilesNamesArray,
   DeleteHandler,
   UpdateHandler,
+  FilesIdsArray,
 }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  const [firstName, setFirstName] = React.useState("");
   //const arr = FilesNamesArray;
   const handleClick = () => {
     setOpen(!open);
   };
   const handleUpdate = (event) => {
     const formData = new FormData();
-    if (event.target.files != undefined) {
+    if (event.target.files !== undefined) {
       formData.append(
         "sendFile",
         event.target.files[0],
@@ -63,9 +63,15 @@ export default function InteractiveList({
       const config = {
         headers: { "content-type": "multipart/form-data" },
       };
-      axios.post("FileHolder", formData, config);
-
-      UpdateHandler();
+      axios.post("FileHolder", formData, config).then(
+        (response) => {
+          console.log(response);
+          UpdateHandler();
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
     }
   };
 
@@ -118,7 +124,11 @@ export default function InteractiveList({
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   <ListItem className={classes.nested}>
-                    <FilesList FilesNamesArray={FilesNamesArray}></FilesList>
+                    <FilesList
+                      FilesNamesArray={FilesNamesArray}
+                      UpdateHandler={UpdateHandler}
+                      FilesIdsArray={FilesIdsArray}
+                    ></FilesList>
                   </ListItem>
                 </List>
               </Collapse>

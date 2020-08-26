@@ -37,4 +37,17 @@ DeleteFolder.propTypes = {
   id: PropTypes.number,
 };
 
-export { AddData, DeleteFolder, loadData };
+async function DeleteFile(id, UpdateData) {
+  await fetch("https://localhost:44396/FileHolder/" + id, {
+    method: "DELETE",
+    headers: { "Content-type": "application/json" },
+  });
+
+  await UpdateData();
+}
+DeleteFolder.propTypes = {
+  UpdateData: PropTypes.func.isRequired,
+  id: PropTypes.number,
+};
+
+export { AddData, DeleteFolder, loadData, DeleteFile };
