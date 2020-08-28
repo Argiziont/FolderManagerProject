@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import DataForm from "./DataForm";
-import { loadData, DeleteFolder, DeleteFile } from "./RESTDataManagment";
+import { loadData, DeleteFolder } from "./RESTDataManagment";
 //import {  } from "./RESTDataManagment";
 import InteractiveList from "./ExperementalList";
 

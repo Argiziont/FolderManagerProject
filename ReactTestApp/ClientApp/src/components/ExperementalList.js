@@ -17,7 +17,12 @@ import FilesList from "./FilesList";
 import ClearIcon from "@material-ui/icons/Clear";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "axios";
+import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
+import PropTypes from "prop-types";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -31,6 +36,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function CircularProgressWithLabel(props) {
+  return (
+    <Box position="relative" display="inline-flex">
+      <CircularProgress variant="static" {...props} />
+      <Box
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        position="absolute"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography
+          variant="caption"
+          component="div"
+          color="textSecondary"
+        >{`${Math.round(props.value)}%`}</Typography>
+      </Box>
+    </Box>
+  );
+}
+
+CircularProgressWithLabel.propTypes = {
+  value: PropTypes.number.isRequired,
+};
+
 export default function InteractiveList({
   FolderName,
   FolderId,
@@ -41,11 +74,12 @@ export default function InteractiveList({
 }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [progressPercent, setprogressPercent] = React.useState("");
   //const arr = FilesNamesArray;
   const handleClick = () => {
     setOpen(!open);
   };
-  const handleUpdate = (event) => {
+  const handleUpdate = async (event) => {
     const formData = new FormData();
     if (event.target.files !== undefined) {
       formData.append(
@@ -60,25 +94,33 @@ export default function InteractiveList({
 
       // Request made to the backend api
       // Send formData object
+
       const config = {
         headers: { "content-type": "multipart/form-data" },
-      };
-      axios.post("FileHolder", formData, config).then(
-        (response) => {
-          console.log(response);
-          UpdateHandler();
+        onUploadProgress: function (progressEvent) {
+          var percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setprogressPercent(percentCompleted);
         },
-        (error) => {
-          console.log(error);
-        }
-      );
+      };
+      await axios
+        .post("https://localhost:44396/FileHolder", formData, config)
+        .then(
+          (response) => {
+            UpdateHandler();
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
     }
   };
 
   return (
     <div className={classes.root}>
       <Grid container spacing={1}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12}>
           <div className={classes.demo}>
             <List component="nav" aria-label="main mailbox folders">
               <ListItem>
@@ -88,7 +130,13 @@ export default function InteractiveList({
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={FolderName} />
+
                 <ListItemSecondaryAction>
+                  {progressPercent > 0 && progressPercent !== 100 && (
+                    <IconButton>
+                      <CircularProgressWithLabel value={progressPercent} />
+                    </IconButton>
+                  )}
                   <Button
                     size="medium"
                     component="label"

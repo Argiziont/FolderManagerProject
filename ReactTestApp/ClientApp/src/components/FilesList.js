@@ -8,12 +8,9 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import { DeleteFile } from "./RESTDataManagment";
-
 function renderRow(props) {
   const handleDelete = () => {
-    console.log(data.idsArray[index]);
     DeleteFile(data.idsArray[index], () => data.UpdateHandler());
   };
   const { index, style, data } = props;
@@ -23,16 +20,6 @@ function renderRow(props) {
         <FileCopyIcon />
       </ListItemIcon>
 
-      <ListItemSecondaryAction>
-        <IconButton
-          onClick={handleDelete}
-          size="small"
-          edge="end"
-          aria-label="delete"
-        >
-          <DeleteIcon />
-        </IconButton>
-      </ListItemSecondaryAction>
       <ListItemText
         primary={
           data.itemsArray[index].length > 15
@@ -45,6 +32,14 @@ function renderRow(props) {
             : data.itemsArray[index]
         }
       />
+      <IconButton
+        onClick={handleDelete}
+        size="small"
+        edge="end"
+        aria-label="delete"
+      >
+        <DeleteIcon />
+      </IconButton>
     </ListItem>
   );
 }
