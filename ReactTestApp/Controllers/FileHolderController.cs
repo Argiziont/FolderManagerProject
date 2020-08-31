@@ -42,6 +42,7 @@ namespace ReactTestApp.Controllers
                 uplodadedFile.File = fileData;
                 db.Files.Add(uplodadedFile);
                 db.SaveChanges();
+
                 return Ok();
             }
             return NotFound();

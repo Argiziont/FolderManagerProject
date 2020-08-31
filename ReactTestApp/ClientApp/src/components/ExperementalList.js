@@ -132,23 +132,24 @@ export default function InteractiveList({
                 <ListItemText primary={FolderName} />
 
                 <ListItemSecondaryAction>
-                  {progressPercent > 0 && progressPercent !== 100 && (
+                  {progressPercent > 0 && progressPercent !== 100 ? (
                     <IconButton>
                       <CircularProgressWithLabel value={progressPercent} />
                     </IconButton>
+                  ) : (
+                    <Button
+                      size="medium"
+                      component="label"
+                      startIcon={<AddIcon />}
+                    >
+                      <input
+                        onChange={handleUpdate}
+                        onClick={UpdateHandler}
+                        type="file"
+                        className={classes.input}
+                      />
+                    </Button>
                   )}
-                  <Button
-                    size="medium"
-                    component="label"
-                    startIcon={<AddIcon />}
-                  >
-                    <input
-                      onChange={handleUpdate}
-                      onClick={UpdateHandler}
-                      type="file"
-                      className={classes.input}
-                    />
-                  </Button>
 
                   {FilesNamesArray != null && FilesNamesArray.length > 0 ? (
                     <IconButton onClick={handleClick} aria-label="expand">

@@ -31,6 +31,10 @@ namespace ReactTestApp
             {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = long.MaxValue;
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -57,6 +61,7 @@ namespace ReactTestApp
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+
 
             app.UseSpa(spa =>
             {
