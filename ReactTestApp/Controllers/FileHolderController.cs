@@ -32,7 +32,12 @@ namespace ReactTestApp.Controllers
             {
                 int key = Convert.ToInt32(Data["id"]);
                 Folder folder = db.Folders.Find(key);
-                FileHolder uplodadedFile = new FileHolder { Name = sendFile.FileName, Folder = folder, Size = sendFile.Length };
+                FileHolder uplodadedFile = new FileHolder { 
+                    Name = sendFile.FileName,
+                    Folder = folder, 
+                    Size = sendFile.Length,
+                    Type= sendFile.ContentType
+                };
 
                 byte[] fileData = null;
                 using (var binaryReader = new BinaryReader(sendFile.OpenReadStream()))
@@ -46,6 +51,21 @@ namespace ReactTestApp.Controllers
                 return Ok();
             }
             return NotFound();
+        }
+        [HttpGet("{Id}")]
+        public IActionResult Get(int Id)
+        {
+            try
+            {
+                FileHolder file = db.Files.Find(Id);
+                return File(file.File, file.Type, file.Name);
+
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
         }
 
         [HttpDelete("{id}")]
