@@ -8,13 +8,18 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
-import { DeleteFile } from "./RESTDataManagment";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
+import { userActions } from "../actions";
+
 import axios from "axios";
 
 function renderRow(props) {
   const handleDelete = () => {
-    DeleteFile(data.idsArray[index], () => data.UpdateHandler());
+    userActions.deleteFile(
+      data.idsArray[index],
+      () => data.UpdateHandler(),
+      data.SnackCallback
+    );
   };
   const HandleDownload = () => {
     axios
@@ -25,28 +30,21 @@ function renderRow(props) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         //Getting name
+        let filename;
         let headerLine = response.headers["content-disposition"];
-        let startFileNameIndex = headerLine.indexOf('"') + 1;
-        let endFileNameIndex = headerLine.lastIndexOf('"');
-        let filename = headerLine.substring(
-          startFileNameIndex,
-          endFileNameIndex
-        );
-
+        let headerSplit = headerLine.split(";");
+        if (headerLine.indexOf('"') !== -1) {
+          let headerNameSplit = headerSplit[1].split('"');
+          filename = headerNameSplit[1];
+        } else {
+          filename = headerSplit[1].substring(10, headerSplit[1].length);
+        }
         link.href = url;
         link.setAttribute("download", filename); //any other extension
         document.body.appendChild(link);
         link.click();
         link.remove();
       });
-    // axios({
-    //   url: "https://localhost:44396/FileHolder/",
-    //   method: "GET", // Worked using POST or PUT. Prefer POST
-    //   params: {
-    //     Id: data.idsArray[index],
-    //   },
-    //   responseType: "blob", // important
-    // })
   };
   const { index, style, data } = props;
   return (
@@ -96,6 +94,7 @@ export default function FilesList({
   FilesNamesArray,
   UpdateHandler,
   FilesIdsArray,
+  SnackCallback,
 }) {
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -118,6 +117,7 @@ export default function FilesList({
           itemsArray: FilesNamesArray,
           idsArray: FilesIdsArray,
           UpdateHandler: UpdateHandler,
+          SnackCallback: SnackCallback,
         }}
       >
         {renderRow}

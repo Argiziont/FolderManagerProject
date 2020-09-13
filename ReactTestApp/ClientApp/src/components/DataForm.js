@@ -1,13 +1,12 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { AddData } from "./RESTDataManagment";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
-
-function DataForm({ UpdateData }) {
+import { userActions } from "../actions";
+function DataForm({ UpdateData, SnackNotification }) {
   const { register, handleSubmit, errors } = useForm();
   const onSubmit = async (data, e) => {
-    await AddData(data, UpdateData);
+    userActions.addFolders(data, UpdateData, SnackNotification);
     e.target.reset();
   };
   return (

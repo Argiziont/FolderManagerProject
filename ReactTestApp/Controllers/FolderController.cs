@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ReactTestApp.Components.HelperComponents;
 using ReactTestApp.Models;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,7 @@ namespace ReactTestApp.Controllers
             #endregion
 
         }
+        [Authorize]
         [HttpGet]
         public IEnumerable<Tuple<int,string,List<string>,List<int>>> Get()
         {
@@ -56,16 +58,16 @@ namespace ReactTestApp.Controllers
             return db.Folders.Find(id);
             //
         }
-
+        [Authorize]
         [HttpPost]
         public IActionResult PostFolder(Folder folder)
         {
-            //folder.Id = FolderSummary.Count > 0 ? FolderSummary.LastOrDefault().Id+1 : 0;
 
             db.Folders.Add(folder);
             db.SaveChanges();
             return Ok(folder);
         }
+        [Authorize]
         [HttpDelete("{id}")]
         public IActionResult DeleteFolder(int id)
         {

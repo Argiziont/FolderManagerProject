@@ -71,6 +71,7 @@ export default function InteractiveList({
   DeleteHandler,
   UpdateHandler,
   FilesIdsArray,
+  SnackCallback,
 }) {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
@@ -177,6 +178,7 @@ export default function InteractiveList({
                       FilesNamesArray={FilesNamesArray}
                       UpdateHandler={UpdateHandler}
                       FilesIdsArray={FilesIdsArray}
+                      SnackCallback={SnackCallback}
                     ></FilesList>
                   </ListItem>
                 </List>

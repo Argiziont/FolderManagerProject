@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ReactTestApp.Components.HelperComponents;
 using ReactTestApp.Models;
-using Microsoft.EntityFrameworkCore.SqlServer;
-using Microsoft.EntityFrameworkCore;
+using ReactTestApp.Models.Entity;
+using ReactTestApp.Services;
+using ReactTestApp.Services.Interfaces;
 
 namespace ReactTestApp
 {
@@ -23,9 +26,13 @@ namespace ReactTestApp
         public void ConfigureServices(IServiceCollection services)
         {
             string connectionString = Configuration.GetConnectionString("FolderFiles");
+            services.AddCors();
             services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(connectionString));
             services.AddControllersWithViews();
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddScoped<IUserAuthService, UserAuthService>();
 
             services.AddSpaStaticFiles(configuration =>
             {
@@ -34,6 +41,11 @@ namespace ReactTestApp
             services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = long.MaxValue;
+            });
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = long.MaxValue; // In case of multipart
             });
         }
 
@@ -48,12 +60,18 @@ namespace ReactTestApp
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-
+            app.UseRouting();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseRouting();
+            app.UseCors(x => x
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+
+            app.UseMiddleware<JwtMiddleware>();
+            
 
             app.UseEndpoints(endpoints =>
             {
