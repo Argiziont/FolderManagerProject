@@ -1,5 +1,7 @@
-import { authHeader } from "../helpers";
 import Cookies from "universal-cookie";
+import axios from "axios";
+
+import { authHeader } from "../helpers";
 import { history } from "../helpers/history";
 
 export const userService = {
@@ -8,8 +10,10 @@ export const userService = {
   getAllUsers,
   loadFolders,
   addFolders,
-  deleteFile,
   deleteFolder,
+  deleteFile,
+  downloadFile,
+  uploadFile,
 };
 
 function login(username, password) {
@@ -111,18 +115,71 @@ function deleteFolder(id, UpdateData) {
       return folder;
     });
 }
-
+function downloadFile(index) {
+  const cookies = new Cookies();
+  let user = cookies.get("user");
+  return axios
+    .get("https://localhost:44396/FileHolder/" + index, {
+      responseType: "blob",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + user.token,
+      },
+    })
+    .then((file) => {
+      const url = window.URL.createObjectURL(new Blob([file.data]));
+      const link = document.createElement("a");
+      //Getting name
+      let filename;
+      let headerLine = file.headers["content-disposition"];
+      let headerSplit = headerLine.split(";");
+      if (headerLine.indexOf('"') !== -1) {
+        let headerNameSplit = headerSplit[1].split('"');
+        filename = headerNameSplit[1];
+      } else {
+        filename = headerSplit[1].substring(10, headerSplit[1].length);
+      }
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return file;
+    });
+}
+function uploadFile(formData, setprogressPercent) {
+  const cookies = new Cookies();
+  let user = cookies.get("user");
+  const config = {
+    headers: {
+      "content-type": "multipart/form-data",
+      Authorization: "Bearer " + user.token,
+    },
+    onUploadProgress: function (progressEvent) {
+      var percentCompleted = Math.round(
+        (progressEvent.loaded * 100) / progressEvent.total
+      );
+      setprogressPercent(percentCompleted);
+    },
+  };
+  return axios
+    .post("https://localhost:44396/FileHolder", formData, config)
+    .then(handleResponse)
+    .then((response) => {
+      return response;
+    });
+}
 function handleResponse(response) {
   return response.text().then((text) => {
     const data = text && JSON.parse(text);
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 && data.statusText === "Unauthorized") {
         // auto logout if 401 response returned from api
         logout();
         history.push("/Login");
       }
 
-      const error = (data && data.message) || response.statusText;
+      const error = data.statusText;
       return Promise.reject(error);
     }
 

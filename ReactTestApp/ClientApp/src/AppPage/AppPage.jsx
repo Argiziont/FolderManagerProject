@@ -1,17 +1,16 @@
-import "./custom.css";
 import React, { Component } from "react";
 import { Router } from "react-router";
-import { LoginPrivateRoute, HomePrivateRoute } from "./components/routes";
+import { LoginPrivateRoute, HomePrivateRoute } from "../components/routes";
 import Cookies from "universal-cookie";
 
-import { Layout } from "./Layout";
-import FolderPage from "./FolderPage/FolderPage";
-import { history } from "./helpers/history";
+import { Layout } from "../Layout";
+import FolderPage from "../FolderPage/FolderPage";
+import { history } from "../helpers/history";
 
-import SignInPage from "./LoginForm/SignInPage";
-import SnackNotification from "./SnackNotification/SnackNotification";
+import SignInPage from "../LoginForm/SignInPage";
+import SnackNotification from "../SnackNotification/SnackNotification";
 
-export default class App extends Component {
+export class AppPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,7 +22,7 @@ export default class App extends Component {
     history.listen((location, action) => {});
     this.SnackCallback = this.SnackCallback.bind(this);
   }
-  static displayName = App.name;
+  static displayName = AppPage.name;
 
   SnackCallback = (notiInfo) => {
     this.setState({

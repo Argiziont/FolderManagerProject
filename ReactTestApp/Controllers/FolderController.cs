@@ -47,7 +47,7 @@ namespace ReactTestApp.Controllers
         }
         [Authorize]
         [HttpGet]
-        public IEnumerable<Tuple<int,string,List<string>,List<int>>> Get()
+        public IEnumerable<Tuple<int, string, List<string>, List<int>>> Get()
         {
             return db.Folders.Select(x => new Tuple<int, string, List<string>, List<int>>(x.Id, x.Name, x.Files.Select(u => u.Name).ToList(), x.Files.Select(u => u.Id).ToList())).ToList();
         }
@@ -58,7 +58,7 @@ namespace ReactTestApp.Controllers
             return db.Folders.Find(id);
             //
         }
-        [Authorize]
+        [Authorize("Admin")]
         [HttpPost]
         public IActionResult PostFolder(Folder folder)
         {
@@ -67,7 +67,7 @@ namespace ReactTestApp.Controllers
             db.SaveChanges();
             return Ok(folder);
         }
-        [Authorize]
+        [Authorize("Moderator", "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteFolder(int id)
         {

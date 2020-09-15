@@ -18,10 +18,11 @@ import ClearIcon from "@material-ui/icons/Clear";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import axios from "axios";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import PropTypes from "prop-types";
+
+import { userActions } from "../actions";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,7 +81,7 @@ export default function InteractiveList({
   const handleClick = () => {
     setOpen(!open);
   };
-  const handleUpdate = async (event) => {
+  const handleUpdate = (event) => {
     const formData = new FormData();
     if (event.target.files !== undefined) {
       formData.append(
@@ -88,34 +89,14 @@ export default function InteractiveList({
         event.target.files[0],
         event.target.files[0].name
       );
-
-      formData.append("Id", FolderId);
-
       // Details of the uploaded file
-
+      formData.append("Id", FolderId);
       // Request made to the backend api
       // Send formData object
-
-      const config = {
-        headers: { "content-type": "multipart/form-data" },
-        onUploadProgress: function (progressEvent) {
-          var percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setprogressPercent(percentCompleted);
-        },
-      };
-      await axios
-        .post("https://localhost:44396/FileHolder", formData, config)
-        .then(
-          (response) => {
-            UpdateHandler();
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
     }
+    userActions
+      .uploadFile(formData, setprogressPercent)
+      .then((response) => UpdateHandler());
   };
 
   return (

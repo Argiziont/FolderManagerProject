@@ -1,10 +1,12 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.SqlTypes;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace ReactTestApp.Components
@@ -206,5 +208,11 @@ namespace ReactTestApp.Components
             }
             return sum;
         }
+        public static ActionResult Result(HttpStatusCode statusCode, string reason) => new ContentResult
+        {
+            StatusCode = (int)statusCode,
+            Content = $"Status Code: {(int)statusCode}; {statusCode}; {reason}",
+            ContentType = "text/plain",
+        };
     }
 }

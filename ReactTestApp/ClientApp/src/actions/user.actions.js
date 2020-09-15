@@ -8,6 +8,8 @@ export const userActions = {
   addFolders,
   deleteFile,
   deleteFolder,
+  downloadFile,
+  uploadFile,
 };
 
 function login(username, password, SnackNotification) {
@@ -79,6 +81,26 @@ function deleteFolder(id, UpdateData, SnackNotification) {
     },
     (error) => {
       SnackNotification([error, "error", "Error"]);
+      return error;
+    }
+  );
+}
+function downloadFile(index) {
+  return userService.downloadFile(index).then(
+    (file) => {
+      return file;
+    },
+    (error) => {
+      return error;
+    }
+  );
+}
+function uploadFile(formData, setprogressPercent) {
+  return userService.uploadFile(formData, setprogressPercent).then(
+    (response) => {
+      return response;
+    },
+    (error) => {
       return error;
     }
   );

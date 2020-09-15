@@ -21,13 +21,13 @@ export class FolderPageLayout extends Component {
   async componentDidMount() {
     this._isMounted = true;
     await this.updateData();
-    userActions.getAllUsers().then((response) => {
-      if (typeof response !== "string") {
-        this.setState({
-          autorized: true,
-        });
-      }
-    });
+    // userActions.getAllUsers().then((response) => {
+    //   if (typeof response !== "string") {
+    //     this.setState({
+    //       autorized: true,
+    //     });
+    //   }
+    // });
   }
 
   componentWillUnmount() {
@@ -88,6 +88,7 @@ export class FolderPageLayout extends Component {
         this.setState({
           folders: data,
           loading: false,
+          autorized: true,
         });
     });
   }

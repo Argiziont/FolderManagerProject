@@ -59,6 +59,7 @@ namespace ReactTestApp.Controllers
             }
             return NotFound();
         }
+        [Authorize]
         [HttpGet("{Id}")]
         public IActionResult Get(int Id)
         {
@@ -70,6 +71,7 @@ namespace ReactTestApp.Controllers
 
                 Extensions.ReadFileStream(builder, file.Id, file.Name, writer);
                 writer.Position = 0;
+
                 return File(writer, file.Type, file.Name);
             }
             catch (Exception)
@@ -78,7 +80,7 @@ namespace ReactTestApp.Controllers
                 return NotFound();
             }
         }
-        [Authorize]
+        [Authorize("Moderator", "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteFile(int id)
         {

@@ -11,8 +11,6 @@ import IconButton from "@material-ui/core/IconButton";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import { userActions } from "../actions";
 
-import axios from "axios";
-
 function renderRow(props) {
   const handleDelete = () => {
     userActions.deleteFile(
@@ -22,29 +20,7 @@ function renderRow(props) {
     );
   };
   const HandleDownload = () => {
-    axios
-      .get("https://localhost:44396/FileHolder/" + data.idsArray[index], {
-        responseType: "blob",
-      })
-      .then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        //Getting name
-        let filename;
-        let headerLine = response.headers["content-disposition"];
-        let headerSplit = headerLine.split(";");
-        if (headerLine.indexOf('"') !== -1) {
-          let headerNameSplit = headerSplit[1].split('"');
-          filename = headerNameSplit[1];
-        } else {
-          filename = headerSplit[1].substring(10, headerSplit[1].length);
-        }
-        link.href = url;
-        link.setAttribute("download", filename); //any other extension
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+    userActions.downloadFile(data.idsArray[index]);
   };
   const { index, style, data } = props;
   return (
