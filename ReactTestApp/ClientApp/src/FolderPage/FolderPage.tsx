@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import { FolderPageLayout } from "./FolderPageLayout";
+import { HubConnection } from "@microsoft/signalr";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -18,16 +19,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function FolderPage({ SnackCallback }) {
+type FolderPageProps = {
+  SnackCallback(notiInfo: string[]): void;
+  SetConnection: Function;
+  connection?: HubConnection;
+};
+export const FolderPage: React.FC<FolderPageProps> = ({
+  SnackCallback,
+  SetConnection,
+  connection,
+}) => {
   const classes = useStyles();
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
         <div className={classes.mainframe}>
-          <FolderPageLayout SnackCallback={SnackCallback} />
+          <FolderPageLayout
+            SnackCallback={SnackCallback}
+            connection={connection}
+            SetConnection={SetConnection}
+          />
         </div>
       </div>
     </Container>
   );
-}
+};
+//export const FolderPage;

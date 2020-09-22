@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ReactTestApp.Components;
 using ReactTestApp.Components.HelperComponents;
+using ReactTestApp.Hubs;
 using ReactTestApp.Models;
 using System;
 using System.IO;
@@ -20,10 +22,13 @@ namespace ReactTestApp.Controllers
 
         private readonly ILogger<FolderController> _logger;
 
-        public FileHolderController(ILogger<FolderController> logger, ApplicationDbContext context)
+        private readonly IHubContext<FolderHub> _folderHub;
+
+        public FileHolderController(ILogger<FolderController> logger, ApplicationDbContext context, IHubContext<FolderHub> hub)
         {
             db = context;
             _logger = logger;
+            _folderHub = hub;
         }
         [HttpPost]
         public async Task<IActionResult> PostFile(IFormCollection Data, IFormFile sendFile)
@@ -42,12 +47,6 @@ namespace ReactTestApp.Controllers
                 db.Files.Add(uplodadedFile);
                 db.SaveChanges();
 
-                // byte[] fileData = null;
-                //using (BinaryReader binaryReader = new BinaryReader(sendFile.OpenReadStream()))
-                //{
-                //    fileData = binaryReader.ReadBytes((int)sendFile.Length);
-                //}
-                //uplodadedFile.File = fileData;
                 using (Stream fileStream = sendFile.OpenReadStream())
                 {
                     SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(db.Database.GetDbConnection().ConnectionString);
@@ -55,6 +54,9 @@ namespace ReactTestApp.Controllers
                 }
 
                 var t = db.Database.GetDbConnection().ConnectionString;
+
+                await _folderHub.Clients.All.SendAsync("DataUpdate");
+
                 return Ok();
             }
             return NotFound();
@@ -91,6 +93,8 @@ namespace ReactTestApp.Controllers
             }
             db.Files.Remove(file);
             db.SaveChanges();
+            _folderHub.Clients.All.SendAsync("DataUpdate");
+
             return Ok(file);
         }
     }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEvent } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -12,9 +12,10 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
-import Cookies from "universal-cookie";
+import { HubConnection } from "@microsoft/signalr";
 
 import { userActions } from "../actions";
+
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
@@ -55,17 +56,23 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-
-export default function NavMenu() {
+type NavMenuProps = {
+  connection?: HubConnection;
+};
+export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
+  connection,
+}) => {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-  const cookies = new Cookies();
+  const [anchorEl, setAnchorEl] = React.useState<Element | null>();
+  const [
+    mobileMoreAnchorEl,
+    setMobileMoreAnchorEl,
+  ] = React.useState<Element | null>();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  const handleProfileMenuOpen = (event) => {
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -78,7 +85,7 @@ export default function NavMenu() {
     handleMobileMenuClose();
   };
 
-  const handleMobileMenuOpen = (event) => {
+  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
@@ -93,9 +100,23 @@ export default function NavMenu() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem
+        onClick={() => {
+          console.log(connection);
+          handleMenuClose();
+        }}
+      >
+        Profile
+      </MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      <MenuItem onClick={() => userActions.logout()}>Login out</MenuItem>
+      <MenuItem
+        onClick={() => {
+          userActions.logout(connection);
+          handleMenuClose();
+        }}
+      >
+        Login out
+      </MenuItem>
     </Menu>
   );
 
@@ -157,7 +178,7 @@ export default function NavMenu() {
           </Typography>
 
           <div className={classes.grow} />
-          {cookies.get("user") && (
+          {sessionStorage.getItem("user") && (
             <div>
               <div className={classes.sectionDesktop}>
                 <IconButton aria-label="show 4 new mails" color="inherit">
@@ -203,4 +224,4 @@ export default function NavMenu() {
       {renderMenu}
     </div>
   );
-}
+};

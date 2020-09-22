@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ReactTestApp.Components.HelperComponents;
+using ReactTestApp.Hubs;
 using ReactTestApp.Models;
 using ReactTestApp.Models.Entity;
 using ReactTestApp.Services;
@@ -30,6 +31,7 @@ namespace ReactTestApp
             services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(connectionString));
             services.AddControllersWithViews();
+            services.AddSignalR();
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddScoped<IUserAuthService, UserAuthService>();
@@ -78,6 +80,7 @@ namespace ReactTestApp
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<FolderHub>("/hubs/Folders");
             });
 
 

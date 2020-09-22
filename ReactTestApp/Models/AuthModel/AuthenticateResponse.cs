@@ -11,15 +11,17 @@ namespace ReactTestApp.Models.AuthModel
         public string Role { get; set; }
         public string Username { get; set; }
         public string Name { get; set; }
-        public string Token { get; set; }
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
 
-        public AuthenticateResponse(User user, string token)
+        public AuthenticateResponse(User user, string access,string refresh)
         {
             Id = user.Id;
             Role = user.Role;
             Name = user.Name;
             Username = user.Username;
-            Token = token;
+            AccessToken = access;
+            RefreshToken = refresh;
         }
     }
 }

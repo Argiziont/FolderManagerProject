@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using ReactTestApp.Components.HelperComponents;
+using ReactTestApp.Hubs;
 using ReactTestApp.Models;
 using System;
 using System.Collections.Generic;
@@ -15,12 +17,15 @@ namespace ReactTestApp.Controllers
         private ApplicationDbContext db;
 
         private readonly ILogger<FolderController> _logger;
+        private readonly IHubContext<FolderHub> _folderHub;
 
-        public FolderController(ILogger<FolderController> logger, ApplicationDbContext context)
+        public FolderController(ILogger<FolderController> logger, ApplicationDbContext context, IHubContext<FolderHub> hub)
         {
             db = context;
 
             _logger = logger;
+
+            _folderHub = hub;
 
             #region standartValues
             //var folder0 = db.Folders.ToList()[0];
@@ -47,10 +52,12 @@ namespace ReactTestApp.Controllers
         }
         [Authorize]
         [HttpGet]
-        public IEnumerable<Tuple<int, string, List<string>, List<int>>> Get()
+        public IActionResult Get()
         {
-            return db.Folders.Select(x => new Tuple<int, string, List<string>, List<int>>(x.Id, x.Name, x.Files.Select(u => u.Name).ToList(), x.Files.Select(u => u.Id).ToList())).ToList();
+            return Ok(db.Folders.Select(x => new Tuple<int, string, List<string>, List<int>>(x.Id, x.Name, x.Files.Select(u => u.Name).ToList(), x.Files.Select(u => u.Id).ToList())).ToList());
+
         }
+
         [HttpGet("{id}")]
         public Folder Get(int id)
         {
@@ -65,6 +72,7 @@ namespace ReactTestApp.Controllers
 
             db.Folders.Add(folder);
             db.SaveChanges();
+            _folderHub.Clients.All.SendAsync("DataUpdate");
             return Ok(folder);
         }
         [Authorize("Moderator", "Admin")]
@@ -79,6 +87,7 @@ namespace ReactTestApp.Controllers
             }
             db.Folders.Remove(folder);
             db.SaveChanges();
+            _folderHub.Clients.All.SendAsync("DataUpdate");
             return Ok(folder);
         }
     }

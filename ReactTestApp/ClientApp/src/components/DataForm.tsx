@@ -2,12 +2,22 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
+
 import { userActions } from "../actions";
-function DataForm({ UpdateData, SnackNotification }) {
-  const { register, handleSubmit, errors } = useForm();
-  const onSubmit = async (data, e) => {
+import { IFolderData } from "../helpers/IFolderData";
+
+type DataFormProprs = {
+  UpdateData: Function;
+  SnackNotification: Function;
+};
+export const DataForm: React.FC<DataFormProprs> = ({
+  UpdateData,
+  SnackNotification,
+}) => {
+  const { register, handleSubmit, reset, errors } = useForm<IFolderData>();
+  const onSubmit = (data: IFolderData) => {
     userActions.addFolders(data, UpdateData, SnackNotification);
-    e.target.reset();
+    reset();
   };
   return (
     <div className="App">
@@ -27,7 +37,7 @@ function DataForm({ UpdateData, SnackNotification }) {
       {errors.Name && <span> This field is required </span>}
     </div>
   );
-}
+};
 
 DataForm.propTypes = {
   UpdateData: PropTypes.func.isRequired,

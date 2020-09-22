@@ -11,5 +11,9 @@ namespace ReactTestApp.Models.AuthModel
 
         [JsonIgnore]
         public string Password { get; set; }
+        public bool LoggedIn { get; set; } = false;
+        public string RequestToken { get; set; }
+        public string RefreshToken { get; set; }
+
     }
 }

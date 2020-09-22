@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import registerServiceWorker from "./services/registerServiceWorker";
 import { SnackbarProvider } from "notistack";
 
-import SnackMessage from "./SnackNotification/SnackMessage";
+import { SnackMessage } from "./SnackNotification";
 import { AppPage } from "./AppPage";
 //import AppPage from "./AppPage/AppPage";
 const baseUrl = document.getElementsByTagName("base")[0].getAttribute("href");

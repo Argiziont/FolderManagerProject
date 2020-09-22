@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -11,16 +10,27 @@ import IconButton from "@material-ui/core/IconButton";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import { userActions } from "../actions";
 
-function renderRow(props) {
+type FilesListProps = {
+  FilesNamesArray: string[];
+  FilesIdsArray: number[];
+  UpdateHandler: Function;
+  SnackCallback: Function;
+};
+type renderRowProps = {
+  index: number;
+  style: any;
+  data: FilesListProps;
+};
+function renderRow(props: renderRowProps) {
   const handleDelete = () => {
     userActions.deleteFile(
-      data.idsArray[index],
+      data.FilesIdsArray[index],
       () => data.UpdateHandler(),
       data.SnackCallback
     );
   };
   const HandleDownload = () => {
-    userActions.downloadFile(data.idsArray[index]);
+    userActions.downloadFile(data.FilesIdsArray[index]);
   };
   const { index, style, data } = props;
   return (
@@ -31,14 +41,14 @@ function renderRow(props) {
 
       <ListItemText
         primary={
-          data.itemsArray[index].length > 15
-            ? data.itemsArray[index].substring(0, 7) +
+          data.FilesNamesArray[index].length > 15
+            ? data.FilesNamesArray[index].substring(0, 7) +
               " . . . " +
-              data.itemsArray[index].substring(
-                data.itemsArray[index].length - 7,
-                data.itemsArray[index].length
+              data.FilesNamesArray[index].substring(
+                data.FilesNamesArray[index].length - 7,
+                data.FilesNamesArray[index].length
               )
-            : data.itemsArray[index]
+            : data.FilesNamesArray[index]
         }
       />
       <IconButton
@@ -60,22 +70,18 @@ function renderRow(props) {
     </ListItem>
   );
 }
-
-renderRow.propTypes = {
-  index: PropTypes.number.isRequired,
-  style: PropTypes.object.isRequired,
-};
-
-export default function FilesList({
+export const FilesList: React.FC<FilesListProps> = ({
   FilesNamesArray,
   UpdateHandler,
   FilesIdsArray,
   SnackCallback,
-}) {
+}) => {
   const useStyles = makeStyles((theme) => ({
     root: {
       width: "100%",
       height: FilesNamesArray.length <= 7 ? 40 * FilesNamesArray.length : 400,
+      minHeight:
+        (FilesNamesArray.length <= 7 ? 40 * FilesNamesArray.length : 400) + 30,
       maxWidth: 400,
       backgroundColor: theme.palette.background.paper,
     },
@@ -90,8 +96,8 @@ export default function FilesList({
         itemSize={46}
         itemCount={FilesNamesArray.length}
         itemData={{
-          itemsArray: FilesNamesArray,
-          idsArray: FilesIdsArray,
+          FilesNamesArray: FilesNamesArray,
+          FilesIdsArray: FilesIdsArray,
           UpdateHandler: UpdateHandler,
           SnackCallback: SnackCallback,
         }}
@@ -100,4 +106,4 @@ export default function FilesList({
       </FixedSizeList>
     </div>
   );
-}
+};

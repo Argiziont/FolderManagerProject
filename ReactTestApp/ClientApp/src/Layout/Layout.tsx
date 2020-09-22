@@ -1,17 +1,21 @@
 import React, { Component } from "react";
 import { Container } from "reactstrap";
+import { HubConnection } from "@microsoft/signalr";
 
 import LayoutGrid from "./LayoutGrid";
-import NavMenu from "../NavMenu/NavMenu";
-import StickyFooter from "../NavMenu/StickyFooter";
+import { StickyFooter, NavMenu } from "../NavMenu";
 
-export class Layout extends Component {
+type LayoutProps = {
+  children?: any;
+  connection?: HubConnection;
+};
+export class Layout extends Component<LayoutProps> {
   static displayName = Layout.name;
 
   render() {
     return (
       <div>
-        <NavMenu />
+        <NavMenu connection={this.props.connection} />
         <Container>
           <LayoutGrid Layout={this.props.children} />
         </Container>

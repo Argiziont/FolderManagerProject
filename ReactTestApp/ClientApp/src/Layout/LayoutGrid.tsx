@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 
@@ -13,7 +13,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function LayoutGrid({ Layout }) {
+type LayoutGridProps = {
+  Layout: ReactNode;
+};
+const LayoutGrid: React.FC<LayoutGridProps> = ({ Layout }) => {
   const classes = useStyles();
 
   return (
@@ -27,4 +30,5 @@ export default function LayoutGrid({ Layout }) {
       </Grid>
     </div>
   );
-}
+};
+export default LayoutGrid;

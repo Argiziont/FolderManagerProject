@@ -1,6 +1,16 @@
 import { useSnackbar } from "notistack";
 
-export default function SnackNotification({ text, type, header }) {
+type SnackNotificationProps = {
+  text: string;
+  type: string;
+  header: string;
+};
+
+export const SnackNotification: React.FC<SnackNotificationProps> = ({
+  text,
+  type,
+  header,
+}) => {
   const { enqueueSnackbar } = useSnackbar();
 
   if (text !== "" && type !== "" && header !== "") {
@@ -16,4 +26,4 @@ export default function SnackNotification({ text, type, header }) {
   }
 
   return null;
-}
+};

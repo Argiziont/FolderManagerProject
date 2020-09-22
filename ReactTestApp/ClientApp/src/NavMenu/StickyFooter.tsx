@@ -5,7 +5,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import Link from "@material-ui/core/Link";
 
-function Copyright() {
+const Copyright: React.FC = () => {
   return (
     <Typography variant="body2" color="textSecondary">
       {"Copyright © "}
@@ -14,12 +14,11 @@ function Copyright() {
         href="https://www.youtube.com/channel/UCFZ1X_Mkwwixjs47-TMG57w"
       >
         YouTube
-      </Link>{" "}
+      </Link>
       {new Date().getFullYear()}
-      {"."}
     </Typography>
   );
-}
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function StickyFooter() {
+export const StickyFooter: React.FC = () => {
   const classes = useStyles();
 
   return (
@@ -52,4 +51,4 @@ export default function StickyFooter() {
       </footer>
     </div>
   );
-}
+};

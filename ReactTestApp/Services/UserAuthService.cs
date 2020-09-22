@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using ReactTestApp.Components.HelperComponents;
+using ReactTestApp.Models;
 using ReactTestApp.Models.AuthModel;
 using ReactTestApp.Models.Entity;
 using ReactTestApp.Services.Interfaces;
@@ -13,38 +15,46 @@ namespace ReactTestApp.Services
     public class UserAuthService : IUserAuthService
     {
         private readonly AppSettings _appSettings;
-        private static List<User> _users = new List<User>
-        {
-            new User { Id = 1, Role = "User", Name = "Andrew", Username = "test", Password = "test" },
-            new User { Id = 2, Role = "Admin", Name = "Jake", Username = "Admin", Password = "Admin" },
-            new User { Id = 3, Role = "Moderator", Name = "Nick", Username = "Moderator", Password = "Moderator" },
-        };
-        public UserAuthService(IOptions<AppSettings> appSettings)
+        private ApplicationDbContext db;
+        public UserAuthService(IOptions<AppSettings> appSettings, ApplicationDbContext context)
         {
             _appSettings = appSettings.Value;
+            db = context;
         }
 
         public AuthenticateResponse Authenticate(AuthenticateRequest model)
         {
-            var user = _users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user = db.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
             // return null if user not found
             if (user == null) return null;
-
+            if (user.LoggedIn) return null;
+            
             // authentication successful so generate jwt token
-           
-            var token = JWTToken.generateJwtToken(user, _appSettings.Secret);
 
-            return new AuthenticateResponse (user, token);
+            var accessToken = JWTToken.generateAccessJwtToken(user, _appSettings.Secret);
+            var refreshToken = JWTToken.generateRefreshJwtToken(user, _appSettings.Secret);
+            user.RequestToken = accessToken;
+            user.RefreshToken = refreshToken;
+            //user.LoggedIn = true;
+            db.SaveChanges();
+
+            return new AuthenticateResponse (user, accessToken, refreshToken);
         }
 
         public IEnumerable<User> GetAll()
         {
-            return _users;
+            return db.Users.ToList();
         }
 
         public User GetById(int id)
         {
-            return _users.FirstOrDefault(x => x.Id == id);
+            // return _users.FirstOrDefault(x => x.Id == id);
+            User user = db.Users.Find(id);
+            if (user != null)
+            {
+                return user;
+            }
+            return null;
         }
     }
 }

@@ -13,7 +13,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import FilesList from "./FilesList";
+import { FilesList } from "./FilesList";
 import ClearIcon from "@material-ui/icons/Clear";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
@@ -36,8 +36,11 @@ const useStyles = makeStyles((theme) => ({
     display: "none",
   },
 }));
+type CircularProgressWithLabelProps = {
+  value: number;
+};
 
-function CircularProgressWithLabel(props) {
+function CircularProgressWithLabel(props: CircularProgressWithLabelProps) {
   return (
     <Box position="relative" display="inline-flex">
       <CircularProgress variant="static" {...props} />
@@ -64,8 +67,19 @@ function CircularProgressWithLabel(props) {
 CircularProgressWithLabel.propTypes = {
   value: PropTypes.number.isRequired,
 };
-
-export default function InteractiveList({
+interface HTMLInputEvent extends Event {
+  target: HTMLInputElement & EventTarget;
+}
+type InteractiveListProprs = {
+  FolderName: string;
+  FolderId: string;
+  FilesNamesArray: string[];
+  FilesIdsArray: number[];
+  UpdateHandler: Function;
+  SnackCallback: Function;
+  DeleteHandler: Function;
+};
+export const InteractiveList: React.FC<InteractiveListProprs> = ({
   FolderName,
   FolderId,
   FilesNamesArray,
@@ -73,30 +87,27 @@ export default function InteractiveList({
   UpdateHandler,
   FilesIdsArray,
   SnackCallback,
-}) {
+}) => {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [progressPercent, setprogressPercent] = React.useState("");
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [progressPercent, setprogressPercent] = React.useState<number>(0);
   //const arr = FilesNamesArray;
   const handleClick = () => {
     setOpen(!open);
   };
-  const handleUpdate = (event) => {
+  const handleUpdate = (event: React.FormEvent<HTMLInputElement>) => {
     const formData = new FormData();
-    if (event.target.files !== undefined) {
-      formData.append(
-        "sendFile",
-        event.target.files[0],
-        event.target.files[0].name
-      );
-      // Details of the uploaded file
-      formData.append("Id", FolderId);
-      // Request made to the backend api
-      // Send formData object
-    }
-    userActions
-      .uploadFile(formData, setprogressPercent)
-      .then((response) => UpdateHandler());
+    const file = (event.target as HTMLInputElement).files;
+    file && formData.append("sendFile", file[0], file[0].name);
+    // Details of the uploaded file
+    formData.append("Id", FolderId);
+    // Request made to the backend api
+    // Send formData object
+
+    userActions.uploadFile(formData, setprogressPercent).then((response) => {
+      UpdateHandler();
+      SnackCallback(["File successfully uploaded", "success", "Success"]);
+    });
   };
 
   return (
@@ -108,11 +119,10 @@ export default function InteractiveList({
               <ListItem>
                 <ListItemAvatar>
                   <Avatar>
-                    <FolderIcon />
+                    <FolderIcon color="primary" />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={FolderName} />
-
                 <ListItemSecondaryAction>
                   {progressPercent > 0 && progressPercent !== 100 ? (
                     <IconButton>
@@ -126,7 +136,7 @@ export default function InteractiveList({
                     >
                       <input
                         onChange={handleUpdate}
-                        onClick={UpdateHandler}
+                        onClick={() => UpdateHandler()}
                         type="file"
                         className={classes.input}
                       />
@@ -142,9 +152,8 @@ export default function InteractiveList({
                       <ClearIcon />
                     </IconButton>
                   )}
-
                   <IconButton
-                    onClick={DeleteHandler}
+                    onClick={() => DeleteHandler()}
                     edge="end"
                     aria-label="delete"
                   >
@@ -154,7 +163,7 @@ export default function InteractiveList({
               </ListItem>
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                  <ListItem className={classes.nested}>
+                  <ListItem>
                     <FilesList
                       FilesNamesArray={FilesNamesArray}
                       UpdateHandler={UpdateHandler}
@@ -170,4 +179,4 @@ export default function InteractiveList({
       </Grid>
     </div>
   );
-}
+};
