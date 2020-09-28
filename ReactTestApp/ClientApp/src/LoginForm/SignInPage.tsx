@@ -35,17 +35,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type SignInPageProps = {
+interface SignInPageProps {
   SnackCallback(notiInfo: string[]): void;
-  SetConnection: Function;
-};
+  setConnected(connected: boolean): void;
+}
 export const SignInPage: React.FC<SignInPageProps> = ({
   SnackCallback,
-  SetConnection,
+  setConnected,
 }) => {
   const classes = useStyles();
   const { register, handleSubmit, control, errors } = useForm();
-
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -61,12 +60,9 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           noValidate
           onSubmit={handleSubmit((data) => {
             userActions
-              .login(data.username, data.password, SnackCallback, SetConnection)
+              .login(data.username, data.password, SnackCallback)
               .then((response) => {
-                if (typeof response == "string") {
-                } else {
-                  //SnackCallback(["You are logged in", "success", "Success"]);
-                }
+                setConnected(true);
               });
           })}
         >

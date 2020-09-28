@@ -8,7 +8,7 @@ import Link from "@material-ui/core/Link";
 const Copyright: React.FC = () => {
   return (
     <Typography variant="body2" color="textSecondary">
-      {"Copyright © "}
+      "Copyright © "
       <Link
         color="inherit"
         href="https://www.youtube.com/channel/UCFZ1X_Mkwwixjs47-TMG57w"

@@ -10,17 +10,17 @@ import IconButton from "@material-ui/core/IconButton";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import { userActions } from "../actions";
 
-type FilesListProps = {
+interface FilesListProps {
   FilesNamesArray: string[];
   FilesIdsArray: number[];
   UpdateHandler: Function;
   SnackCallback: Function;
-};
-type renderRowProps = {
+}
+interface renderRowProps {
   index: number;
   style: any;
   data: FilesListProps;
-};
+}
 function renderRow(props: renderRowProps) {
   const handleDelete = () => {
     userActions.deleteFile(

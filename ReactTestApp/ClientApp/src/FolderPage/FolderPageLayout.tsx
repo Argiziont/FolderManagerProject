@@ -1,130 +1,105 @@
-import React, { Component } from "react";
-import { InteractiveList, DataForm } from "../components";
+import React, { useState, useEffect } from "react";
+import { FolderManagmentForm } from "../components";
 import { userActions } from "../actions";
-import { HubConnectionBuilder } from "@microsoft/signalr";
-import { HubConnection } from "@microsoft/signalr";
-import * as signalR from "@microsoft/signalr";
-//import { connection } from "../helpers";
-interface Ifolder {
-  item1: string;
-  item2: string;
-  item3: string[];
-  item4: number[];
+import { IFolder } from "../helpers";
+import { FoldersTable } from "./FoldersTable";
+import { useSignalr } from "@known-as-bmf/react-signalr";
+interface FolderPageLayoutProps {
+  SnackCallback(notiInfo: string[]): void;
+  setConnectedState(connected: boolean): void;
 }
-type FolderPageLayoutProps = {
-  SnackCallback: Function;
-  SetConnection: Function;
-  connection?: HubConnection;
-};
-type FolderPageLayoutState = {
-  folders: Ifolder[];
-  loading: boolean;
-  autorized: boolean;
-};
-export class FolderPageLayout extends Component<
-  FolderPageLayoutProps,
-  FolderPageLayoutState
-> {
-  static displayName = FolderPageLayout.name;
-  state: FolderPageLayoutState = {
-    folders: [],
-    loading: true,
-    autorized: false,
-  };
-  _isMounted: boolean = false;
 
-  constructor(props: FolderPageLayoutProps) {
-    super(props);
-    this.updateData = this.updateData.bind(this);
-  }
-
-  async componentDidMount() {
-    this._isMounted = true;
-    if (
-      this.props.connection &&
-      this.props.connection.state === signalR.HubConnectionState.Disconnected
-    ) {
-      this.props.connection.start().then((result) => {
-        this.props.connection &&
-          this.props.connection.on("Notify", (message) => {});
-        this.props.connection &&
-          this.props.connection.on("DataUpdate", (message) => {
-            this.updateData();
-          });
-        this.props.connection &&
-          this.props.connection.on("Overload", (message) => {
-            this.props.connection && this.props.connection.stop();
-            userActions.logout();
-          });
-      });
-    }
-    await this.updateData();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    this.props.connection?.stop();
-  }
-  async updateData() {
+export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
+  SnackCallback,
+  setConnectedState,
+}) => {
+  const updateData = async () => {
     await userActions.loadFolders().then((data) => {
-      this._isMounted &&
-        this.setState({
-          folders: data,
-          loading: false,
-          autorized: true,
-        });
+      setFolders(data);
+      setLoading(false);
+      setAutorized(true);
     });
-  }
-  static renderFoldersTable(
-    folders: Ifolder[],
-    UpdateFoldedData: Function,
-    SnackCallback: Function
-  ) {
-    return (
-      <div>
-        {folders.map((folder) => (
-          <InteractiveList
-            key={folder.item1}
-            FolderName={folder.item2}
-            FilesNamesArray={folder.item3}
-            FilesIdsArray={folder.item4}
-            FolderId={folder.item1}
-            DeleteHandler={async () =>
-              userActions.deleteFolder(
-                folder.item1,
-                () => UpdateFoldedData(),
-                SnackCallback
-              )
-            }
-            UpdateHandler={() => UpdateFoldedData()}
-            SnackCallback={SnackCallback}
-          ></InteractiveList>
-        ))}
-      </div>
-    );
-  }
-  render() {
-    let contents =
-      this.state.loading && this.state.autorized ? (
-        <p>
-          <em> Loading... </em>
-        </p>
-      ) : (
-        FolderPageLayout.renderFoldersTable(
-          this.state.folders,
-          () => this.updateData(),
-          this.props.SnackCallback
-        )
-      );
+  };
 
-    return (
-      <div>
-        <h1 id="tabelLabel"> Folders List </h1> {contents}
-        <DataForm
-          UpdateData={() => this.updateData()}
-          SnackNotification={this.props.SnackCallback}
-        />
-      </div>
-    );
-  }
-}
+  const signalrEndpoint =
+    "https://localhost:44396/hubs/Folders?token={" +
+    JSON.parse(sessionStorage.getItem("user") || "[]").accessToken +
+    "}";
+  const [folders, setFolders] = useState<IFolder[]>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [autorized, setAutorized] = useState<boolean>(false);
+  const [connected, setConnected] = useState<boolean>(false);
+  const { on } = useSignalr(signalrEndpoint);
+
+  useEffect(() => {
+    let cleanupFunction = false;
+
+    const updateSub = on<any>("DataUpdate").subscribe(() => {
+      if (!cleanupFunction) updateData();
+    });
+    const overloadSub = on<any>("Overload").subscribe(() => {
+      if (!cleanupFunction) {
+        userActions.logout();
+        setConnected(false);
+        SnackCallback([
+          "Server is full, sorry, you are disconnected",
+          "error",
+          "Error",
+        ]);
+      }
+    });
+    const connectedSub = on<any>("ConnectionSuccessful").subscribe(() => {
+      if (!cleanupFunction) {
+        setConnected(true);
+        setConnectedState(true);
+      }
+    });
+    const disconnectSub = on<any>("Disconnection").subscribe(() => {
+      if (!cleanupFunction) {
+        setConnected(false);
+        setConnectedState(false);
+        setAutorized(false);
+      }
+    });
+
+    return () => {
+      updateSub.unsubscribe();
+      overloadSub.unsubscribe();
+      connectedSub.unsubscribe();
+      disconnectSub.unsubscribe();
+      cleanupFunction = true;
+    };
+  }, [on, SnackCallback, setConnectedState]);
+
+  useEffect(() => {
+    let cleanupFunction = false;
+    if (!cleanupFunction) {
+      updateData();
+    }
+    return () => {
+      cleanupFunction = true;
+    };
+  }, []);
+
+  return (
+    <div>
+      {connected && loading && autorized ? (
+        <p> Loading... </p>
+      ) : (
+        <>
+          <h1> Folders List </h1>
+
+          <FoldersTable
+            folders={folders}
+            UpdateFoldedData={updateData}
+            SnackCallback={SnackCallback}
+          ></FoldersTable>
+        </>
+      )}
+      <FolderManagmentForm
+        UpdateData={() => updateData()}
+        SnackNotification={SnackCallback}
+      />
+    </div>
+  );
+};

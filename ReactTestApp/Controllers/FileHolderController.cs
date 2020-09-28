@@ -20,16 +20,14 @@ namespace ReactTestApp.Controllers
     {
         private ApplicationDbContext db;  
 
-        private readonly ILogger<FolderController> _logger;
-
         private readonly IHubContext<FolderHub> _folderHub;
 
-        public FileHolderController(ILogger<FolderController> logger, ApplicationDbContext context, IHubContext<FolderHub> hub)
+        public FileHolderController(ApplicationDbContext context, IHubContext<FolderHub> hub)
         {
             db = context;
-            _logger = logger;
             _folderHub = hub;
         }
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostFile(IFormCollection Data, IFormFile sendFile)
         {

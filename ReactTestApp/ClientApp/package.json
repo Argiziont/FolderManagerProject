@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@known-as-bmf/react-signalr": "^1.0.1",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
@@ -33,6 +34,7 @@
     "react-window": "^1.8.5",
     "reactstrap": "^8.4.1",
     "rimraf": "^2.6.2",
+    "rxjs": "^6.6.3",
     "universal-cookie": "^4.0.3"
   },
   "devDependencies": {

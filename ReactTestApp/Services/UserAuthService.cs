@@ -35,7 +35,6 @@ namespace ReactTestApp.Services
             var refreshToken = JWTToken.generateRefreshJwtToken(user, _appSettings.Secret);
             user.RequestToken = accessToken;
             user.RefreshToken = refreshToken;
-            //user.LoggedIn = true;
             db.SaveChanges();
 
             return new AuthenticateResponse (user, accessToken, refreshToken);

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { authHeader } from "../helpers";
-import { IFolderData } from "../helpers/IFolderData";
+import { IFolderData } from "../helpers";
 import { history } from "../helpers";
 export const userService = {
   login,
@@ -31,6 +31,9 @@ async function login(username: string, password: string) {
   sessionStorage.setItem("user", JSON.stringify(user));
   return user;
 }
+function logout() {
+  sessionStorage.removeItem("user");
+}
 async function getAllUsers() {
   const requestOptions: any = {
     method: "GET",
@@ -42,12 +45,6 @@ async function getAllUsers() {
 
   const response = await fetch("https://localhost:44396/User", requestOptions);
   return handleResponse(response);
-}
-function logout() {
-  // remove user from local storage to log user out
-  //connection && connection.stop();
-  //const conn=connection();
-  sessionStorage.removeItem("user");
 }
 async function loadFolders() {
   const requestOptions: any = {

@@ -1,9 +1,7 @@
 import { history } from "../helpers/history";
-import { HubConnectionBuilder } from "@microsoft/signalr";
-import { HubConnection } from "@microsoft/signalr";
 
 import { userService } from "../services";
-import { IFolderData } from "../helpers/IFolderData";
+import { IFolderData } from "../helpers";
 export const userActions = {
   login,
   logout,
@@ -19,19 +17,12 @@ export const userActions = {
 function login(
   username: string,
   password: string,
-  SnackNotification: Function,
-  SetConnection: Function
+  SnackNotification: Function
 ) {
   return userService.login(username, password).then(
     (user) => {
       SnackNotification(["Successfully logged in", "success", "Success"]);
       history.push("/");
-      SetConnection(
-        new HubConnectionBuilder()
-          .withUrl("/hubs/Folders?token={" + user.accessToken + "}")
-          .withAutomaticReconnect()
-          .build()
-      );
       return user;
     },
     (error) => {
@@ -44,9 +35,8 @@ function login(
     }
   );
 }
-function logout(connection?: HubConnection) {
+function logout() {
   userService.logout();
-  connection?.stop();
   history.push("/Login");
 }
 function getAllUsers() {

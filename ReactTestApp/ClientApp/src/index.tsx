@@ -7,15 +7,19 @@ import { SnackbarProvider } from "notistack";
 
 import { SnackMessage } from "./SnackNotification";
 import { AppPage } from "./AppPage";
-//import AppPage from "./AppPage/AppPage";
-const baseUrl = document.getElementsByTagName("base")[0].getAttribute("href");
+
+const baseUrl = document
+  .getElementsByTagName("base")[0]
+  .getAttribute("href") as string;
 const rootElement = document.getElementById("root");
 
 ReactDOM.render(
   <BrowserRouter basename={baseUrl}>
     <SnackbarProvider
       maxSnack={3}
-      content={(key, message) => <SnackMessage id={key} message={message} />}
+      content={(key: string, message: string[]) =>
+        message && <SnackMessage id={key.toString()} message={message} />
+      }
     >
       <AppPage />
     </SnackbarProvider>

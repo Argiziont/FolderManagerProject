@@ -22,9 +22,9 @@ namespace ReactTestApp.Hubs
         {
             usersCount++;
         
-            if (usersCount >= 6)
+            if (usersCount >= 3)
             {
-                await Clients.Caller.SendAsync("Overload", $"{Context.ConnectionId} вошел (Чат переполнен). Всего: {usersCount}");
+                await Clients.Caller.SendAsync("Overload");
             }
             else
             {
@@ -33,8 +33,8 @@ namespace ReactTestApp.Hubs
                 User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
                 user.LoggedIn = true;
                 db.SaveChanges();
-
-                await Clients.All.SendAsync("Notify", $"{Context.ConnectionId} вошел . Всего: {usersCount}");
+                var z = Context.ConnectionId;
+                await Clients.Caller.SendAsync("ConnectionSuccessful");
             }
             await base.OnConnectedAsync();
         }
@@ -42,12 +42,11 @@ namespace ReactTestApp.Hubs
         {
             usersCount--;
             string token = getToken(Context.GetHttpContext());
-
+            await Clients.Caller.SendAsync("Disconnection");
             User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
             user.LoggedIn = false;
             db.SaveChanges();
 
-            await Clients.All.SendAsync("Notify", $"{Context.ConnectionId} покинул нас. Всего: {usersCount}");
             Context.Abort();
             await base.OnDisconnectedAsync(exception);
         }

@@ -13,9 +13,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type LayoutGridProps = {
+interface LayoutGridProps {
   Layout: ReactNode;
-};
+}
 const LayoutGrid: React.FC<LayoutGridProps> = ({ Layout }) => {
   const classes = useStyles();
 

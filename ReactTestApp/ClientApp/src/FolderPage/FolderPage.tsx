@@ -4,7 +4,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
 import { FolderPageLayout } from "./FolderPageLayout";
-import { HubConnection } from "@microsoft/signalr";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -14,20 +13,18 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   mainframe: {
-    width: "100%", // Fix IE 11 issue.
+    width: "100%", // Fix issue.
     marginTop: theme.spacing(1),
   },
 }));
 
-type FolderPageProps = {
+interface FolderPageProps {
   SnackCallback(notiInfo: string[]): void;
-  SetConnection: Function;
-  connection?: HubConnection;
-};
+  setConnected(connected: boolean): void;
+}
 export const FolderPage: React.FC<FolderPageProps> = ({
   SnackCallback,
-  SetConnection,
-  connection,
+  setConnected,
 }) => {
   const classes = useStyles();
   return (
@@ -36,13 +33,11 @@ export const FolderPage: React.FC<FolderPageProps> = ({
       <div className={classes.paper}>
         <div className={classes.mainframe}>
           <FolderPageLayout
+            setConnectedState={setConnected}
             SnackCallback={SnackCallback}
-            connection={connection}
-            SetConnection={SetConnection}
           />
         </div>
       </div>
     </Container>
   );
 };
-//export const FolderPage;

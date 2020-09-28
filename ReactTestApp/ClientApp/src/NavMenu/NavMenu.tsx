@@ -1,4 +1,4 @@
-import React, { MouseEvent } from "react";
+import React, { MouseEvent, useImperativeHandle, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -12,7 +12,6 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
-import { HubConnection } from "@microsoft/signalr";
 
 import { userActions } from "../actions";
 
@@ -56,14 +55,14 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-type NavMenuProps = {
-  connection?: HubConnection;
-};
-export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
-  connection,
-}) => {
+interface NavMenuProps {
+  //props
+}
+export const NavMenu = React.forwardRef<void, NavMenuProps>((props, ref) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<Element | null>();
+  const [connected, setConnected] = useState<boolean>(false);
+
   const [
     mobileMoreAnchorEl,
     setMobileMoreAnchorEl,
@@ -71,6 +70,12 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  //Ref for change user menu visibility
+  const connectionChange = (con: boolean) => {
+    setConnected(con);
+  };
+  useImperativeHandle(ref, () => ({ connectionChange }));
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -88,7 +93,6 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -102,7 +106,6 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
     >
       <MenuItem
         onClick={() => {
-          console.log(connection);
           handleMenuClose();
         }}
       >
@@ -111,7 +114,8 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
       <MenuItem
         onClick={() => {
-          userActions.logout(connection);
+          userActions.logout();
+          setConnected(false);
           handleMenuClose();
         }}
       >
@@ -178,7 +182,7 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
           </Typography>
 
           <div className={classes.grow} />
-          {sessionStorage.getItem("user") && (
+          {connected && (
             <div>
               <div className={classes.sectionDesktop}>
                 <IconButton aria-label="show 4 new mails" color="inherit">
@@ -224,4 +228,4 @@ export const NavMenu: React.FunctionComponent<NavMenuProps> = ({
       {renderMenu}
     </div>
   );
-};
+});

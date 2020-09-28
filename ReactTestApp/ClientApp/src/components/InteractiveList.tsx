@@ -20,7 +20,6 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import PropTypes from "prop-types";
 
 import { userActions } from "../actions";
 
@@ -29,16 +28,16 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     maxWidth: 752,
   },
-  demo: {
+  list: {
     backgroundColor: theme.palette.background.paper,
   },
   input: {
     display: "none",
   },
 }));
-type CircularProgressWithLabelProps = {
+interface CircularProgressWithLabelProps {
   value: number;
-};
+}
 
 function CircularProgressWithLabel(props: CircularProgressWithLabelProps) {
   return (
@@ -64,21 +63,15 @@ function CircularProgressWithLabel(props: CircularProgressWithLabelProps) {
   );
 }
 
-CircularProgressWithLabel.propTypes = {
-  value: PropTypes.number.isRequired,
-};
-interface HTMLInputEvent extends Event {
-  target: HTMLInputElement & EventTarget;
-}
-type InteractiveListProprs = {
+interface InteractiveListProprs {
   FolderName: string;
-  FolderId: string;
+  FolderId: number;
   FilesNamesArray: string[];
   FilesIdsArray: number[];
   UpdateHandler: Function;
   SnackCallback: Function;
   DeleteHandler: Function;
-};
+}
 export const InteractiveList: React.FC<InteractiveListProprs> = ({
   FolderName,
   FolderId,
@@ -98,23 +91,25 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
   const handleUpdate = (event: React.FormEvent<HTMLInputElement>) => {
     const formData = new FormData();
     const file = (event.target as HTMLInputElement).files;
-    file && formData.append("sendFile", file[0], file[0].name);
-    // Details of the uploaded file
-    formData.append("Id", FolderId);
-    // Request made to the backend api
-    // Send formData object
+    if (file) {
+      formData.append("sendFile", file[0], file[0].name);
+      // Details of the uploaded file
+      formData.append("Id", FolderId.toString());
+      // Request made to the backend api
+      // Send formData object
 
-    userActions.uploadFile(formData, setprogressPercent).then((response) => {
-      UpdateHandler();
-      SnackCallback(["File successfully uploaded", "success", "Success"]);
-    });
+      userActions.uploadFile(formData, setprogressPercent).then((response) => {
+        UpdateHandler();
+        SnackCallback(["File successfully uploaded", "success", "Success"]);
+      });
+    }
   };
 
   return (
     <div className={classes.root}>
       <Grid container spacing={1}>
         <Grid item xs={12} md={12}>
-          <div className={classes.demo}>
+          <div className={classes.list}>
             <List component="nav" aria-label="main mailbox folders">
               <ListItem>
                 <ListItemAvatar>

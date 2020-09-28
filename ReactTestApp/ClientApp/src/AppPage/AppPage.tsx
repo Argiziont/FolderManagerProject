@@ -1,47 +1,49 @@
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import { Router } from "react-router";
 import { LoginPrivateRoute, HomePrivateRoute } from "../components/routes";
-import { HubConnection } from "@microsoft/signalr";
+import { useSnackbar } from "notistack";
 
 import { Layout } from "../Layout";
 import { FolderPage } from "../FolderPage/";
-import { history } from "../helpers/history";
+import { history } from "../helpers";
 
 import { SignInPage } from "../LoginForm";
-import { SnackNotification } from "../SnackNotification/SnackNotification";
-
-// const SnackCallback: React.FC<string[]> = (notiInfo) => {
-//   this.setState({
-//     notifyText: notiInfo[0],
-//     notifyType: notiInfo[1],
-//     notifyHeader: notiInfo[2],
-//     notityReady: true,
-//   });
-// };
 
 export const AppPage: React.FC = () => {
   history.listen((location, action) => {});
-  const [snackCallback, SetSnackCallback] = useState<string[]>();
-  const [connection, SetConnection] = useState<HubConnection>();
+  const { enqueueSnackbar } = useSnackbar();
+  const handleConnected = (connected: boolean) => {
+    NavBarRef.current.connectionChange(connected);
+  };
+  const NavBarRef = useRef<any>();
+  const SetSnackCallback = (snackCallback: string[]) => {
+    if (
+      snackCallback[0] !== "" &&
+      snackCallback[1] !== "" &&
+      snackCallback[2] !== ""
+    ) {
+      enqueueSnackbar(snackCallback, {
+        variant: "info",
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "right",
+        },
+        key: snackCallback[0],
+        preventDuplicate: true,
+      });
+    }
+  };
 
   return (
-    <Layout connection={connection}>
-      {snackCallback && (
-        <SnackNotification
-          text={snackCallback[0]}
-          type={snackCallback[1]}
-          header={snackCallback[2]}
-        ></SnackNotification>
-      )}
+    <Layout NavBarRef={NavBarRef} connected={true}>
       <Router history={history}>
         <LoginPrivateRoute
           exact
           path="/"
           component={() => (
             <FolderPage
+              setConnected={handleConnected}
               SnackCallback={SetSnackCallback}
-              connection={connection}
-              SetConnection={SetConnection}
             />
           )}
         />
@@ -50,8 +52,8 @@ export const AppPage: React.FC = () => {
           path="/Login"
           component={() => (
             <SignInPage
+              setConnected={handleConnected}
               SnackCallback={SetSnackCallback}
-              SetConnection={SetConnection}
             />
           )}
         />
