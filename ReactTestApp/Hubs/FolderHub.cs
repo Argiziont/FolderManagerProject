@@ -21,22 +21,24 @@ namespace ReactTestApp.Hubs
         public override async Task OnConnectedAsync()
         {
             usersCount++;
-        
+            string token = getToken(Context.GetHttpContext());
+
+            User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
+            user.LoggedIn = true;
+            db.SaveChanges();
+            var z = Context.ConnectionId;
+
             if (usersCount >= 3)
             {
                 await Clients.Caller.SendAsync("Overload");
             }
             else
             {
-                string token= getToken( Context.GetHttpContext());
-
-                User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
-                user.LoggedIn = true;
-                db.SaveChanges();
-                var z = Context.ConnectionId;
                 await Clients.Caller.SendAsync("ConnectionSuccessful");
+                await Clients.All.SendAsync("DataUpdate");
             }
             await base.OnConnectedAsync();
+
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useSignalr } from "@known-as-bmf/react-signalr";
+import { debounceTime } from "rxjs/operators";
+
 import { FolderManagmentForm } from "../components";
 import { userActions } from "../actions";
 import { IFolder } from "../helpers";
 import { FoldersTable } from "./FoldersTable";
-import { useSignalr } from "@known-as-bmf/react-signalr";
+
 interface FolderPageLayoutProps {
   SnackCallback(notiInfo: string[]): void;
   setConnectedState(connected: boolean): void;
@@ -34,34 +37,42 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
   useEffect(() => {
     let cleanupFunction = false;
 
-    const updateSub = on<any>("DataUpdate").subscribe(() => {
-      if (!cleanupFunction) updateData();
-    });
-    const overloadSub = on<any>("Overload").subscribe(() => {
-      if (!cleanupFunction) {
-        userActions.logout();
-        setConnected(false);
-        setConnectedState(false);
-        SnackCallback([
-          "Server is full, sorry, you are disconnected",
-          "error",
-          "Error",
-        ]);
-      }
-    });
-    const connectedSub = on<any>("ConnectionSuccessful").subscribe(() => {
-      if (!cleanupFunction) {
-        setConnected(true);
-        setConnectedState(true);
-      }
-    });
-    const disconnectSub = on<any>("Disconnection").subscribe(() => {
-      if (!cleanupFunction) {
-        setConnected(false);
-        setConnectedState(false);
-        setAutorized(false);
-      }
-    });
+    const updateSub = on<any>("DataUpdate")
+      .pipe(debounceTime(200))
+      .subscribe(() => {
+        if (!cleanupFunction) updateData();
+      });
+    const overloadSub = on<any>("Overload")
+      .pipe(debounceTime(200))
+      .subscribe(() => {
+        if (!cleanupFunction) {
+          userActions.logout();
+          setConnected(false);
+          setConnectedState(false);
+          SnackCallback([
+            "Server is full, sorry, you are disconnected",
+            "error",
+            "Error",
+          ]);
+        }
+      });
+    const connectedSub = on<any>("ConnectionSuccessful")
+      .pipe(debounceTime(200))
+      .subscribe(() => {
+        if (!cleanupFunction) {
+          setConnected(true);
+          setConnectedState(true);
+        }
+      });
+    const disconnectSub = on<any>("Disconnection")
+      .pipe(debounceTime(200))
+      .subscribe(() => {
+        if (!cleanupFunction) {
+          setConnected(false);
+          setConnectedState(false);
+          setAutorized(false);
+        }
+      });
 
     return () => {
       updateSub.unsubscribe();
@@ -70,18 +81,7 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
       disconnectSub.unsubscribe();
       cleanupFunction = true;
     };
-  }, [on, SnackCallback, setConnectedState]);
-
-  useEffect(() => {
-    let cleanupFunction = false;
-    if (!cleanupFunction) {
-      updateData();
-      setConnectedState(true);
-    }
-    return () => {
-      cleanupFunction = true;
-    };
-  }, [setConnectedState]);
+  }, [on, setConnectedState, SnackCallback]);
 
   return (
     <div>

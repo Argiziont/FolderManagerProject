@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using ReactTestApp.Components.HelperComponents;
+using ReactTestApp.Hubs;
 using ReactTestApp.Models;
 using ReactTestApp.Models.AuthModel;
 using ReactTestApp.Models.Entity;
