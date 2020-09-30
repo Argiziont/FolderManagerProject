@@ -26,7 +26,7 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
     JSON.parse(sessionStorage.getItem("user") || "[]").accessToken +
     "}";
   const [folders, setFolders] = useState<IFolder[]>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [autorized, setAutorized] = useState<boolean>(false);
   const [connected, setConnected] = useState<boolean>(false);
   const { on } = useSignalr(signalrEndpoint);
@@ -41,6 +41,7 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
       if (!cleanupFunction) {
         userActions.logout();
         setConnected(false);
+        setConnectedState(false);
         SnackCallback([
           "Server is full, sorry, you are disconnected",
           "error",
@@ -75,15 +76,16 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
     let cleanupFunction = false;
     if (!cleanupFunction) {
       updateData();
+      setConnectedState(true);
     }
     return () => {
       cleanupFunction = true;
     };
-  }, []);
+  }, [setConnectedState]);
 
   return (
     <div>
-      {connected && loading && autorized ? (
+      {!connected || loading || !autorized ? (
         <p> Loading... </p>
       ) : (
         <>
@@ -94,12 +96,12 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
             UpdateFoldedData={updateData}
             SnackCallback={SnackCallback}
           ></FoldersTable>
+          <FolderManagmentForm
+            UpdateData={() => updateData()}
+            SnackNotification={SnackCallback}
+          />
         </>
       )}
-      <FolderManagmentForm
-        UpdateData={() => updateData()}
-        SnackNotification={SnackCallback}
-      />
     </div>
   );
 };

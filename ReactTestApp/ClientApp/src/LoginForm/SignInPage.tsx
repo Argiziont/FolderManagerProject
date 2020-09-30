@@ -62,7 +62,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             userActions
               .login(data.username, data.password, SnackCallback)
               .then((response) => {
-                setConnected(true);
+                //setConnected(true);
               });
           })}
         >
