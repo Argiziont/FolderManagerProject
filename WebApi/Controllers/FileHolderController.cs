@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using FolderProjectApp.Components;
 using FolderProjectApp.Components.HelperComponents;
 using FolderProjectApp.Hubs;
@@ -11,6 +10,7 @@ using FolderProjectApp.Models;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using FolderProjectApp.Services.Interfaces;
 
 namespace FolderProjectApp.Controllers 
 {
@@ -18,23 +18,29 @@ namespace FolderProjectApp.Controllers
     [ApiController]
     public class FileHolderController : ControllerBase
     {
-        private ApplicationDbContext db;  
+        private readonly IEFFileFolderContext db;  
 
         private readonly IHubContext<FolderHub> _folderHub;
 
-        public FileHolderController(ApplicationDbContext context, IHubContext<FolderHub> hub)
+        public FileHolderController(IEFFileFolderContext context, IHubContext<FolderHub> hub)
         {
             db = context;
             _folderHub = hub;
         }
+
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> PostFile(IFormCollection Data, IFormFile sendFile)
+        [RequestSizeLimit(737280000)]
+        [HttpPost("{Id}")]
+        public async Task<IActionResult> PostFile(int Id,IFormFile sendFile)
         {
             if (sendFile != null)
             {
-                int key = Convert.ToInt32(Data["id"]);
-                Folder folder = db.Folders.Find(key);
+               
+                Folder folder = await db.GetFolderByIdAsync(Id);
+
+                IClientProxy hub = _folderHub.Clients.All;
+                if (hub == null) return BadRequest();
+
                 FileHolder uplodadedFile = new FileHolder
                 {
                     Name = sendFile.FileName,
@@ -42,41 +48,34 @@ namespace FolderProjectApp.Controllers
                     Size = sendFile.Length,
                     Type = sendFile.ContentType
                 };
-                db.Files.Add(uplodadedFile);
-                db.SaveChanges();
+                await db.AddFileAsync(uplodadedFile);
 
                 using (Stream fileStream = sendFile.OpenReadStream())
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(db.Database.GetDbConnection().ConnectionString);
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(db.GetDatabase().GetDbConnection().ConnectionString);
                     await Extensions.InsertFileStream(builder, uplodadedFile.Id, fileStream);
                 }
 
-                var t = db.Database.GetDbConnection().ConnectionString;
-
-                await _folderHub.Clients.All.SendAsync("DataUpdate");
+                await hub.SendAsync("DataUpdate");
 
                 return Ok();
             }
             return NotFound();
         }
+
         [Authorize]
         [HttpGet("{Id}")]
-        public IActionResult Get(int Id)
+        public async Task<IActionResult> Get(int Id)
         {
             var writer = new MemoryStream();
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(db.Database.GetDbConnection().ConnectionString);
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(db.GetDatabase().GetDbConnection().ConnectionString);
             try
             {
-                FileHolder file = db.Files.Find(Id);
+                FileHolder file =await db.GetFileByIdAsync(Id);
 
                 Extensions.ReadFileStream(builder, file.Id, file.Name, writer);
                 writer.Position = 0;
-
-                return new FileStreamResult(writer, file.Type)
-                {
-                    FileDownloadName = file.Name
-                };
-
+                return File(writer, file.Type, file.Name);
             }
             catch (Exception)
             {
@@ -84,18 +83,18 @@ namespace FolderProjectApp.Controllers
                 return NotFound();
             }
         }
-        [Authorize("Moderator", "Admin")]
+
+        [Authorize("Moderator")]
         [HttpDelete("{id}")]
-        public IActionResult DeleteFile(int id)
+        public async Task<IActionResult> DeleteFile(int id)
         {
-            FileHolder file = db.Files.Find(id);
+            FileHolder file = await db.GetFileByIdAsync(id);
             if (file == null)
             {
                 return NotFound();
             }
-            db.Files.Remove(file);
-            db.SaveChanges();
-            _folderHub.Clients.All.SendAsync("DataUpdate");
+            await db.RemoveFileAsync(file);
+            await _folderHub.Clients.All.SendAsync("DataUpdate");
 
             return Ok(file);
         }

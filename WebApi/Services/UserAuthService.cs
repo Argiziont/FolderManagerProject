@@ -17,40 +17,38 @@ namespace FolderProjectApp.Services
     public class UserAuthService : IUserAuthService
     {
         private readonly AppSettings _appSettings;
-        private ApplicationDbContext db;
-        public UserAuthService(IOptions<AppSettings> appSettings, ApplicationDbContext context)
+        private IEFFileFolderContext db;
+        public UserAuthService(IOptions<AppSettings> appSettings, IEFFileFolderContext context)
         {
             _appSettings = appSettings.Value;
             db = context;
         }
 
-        public AuthenticateResponse Authenticate(AuthenticateRequest model)
+        public async Task<AuthenticateResponse> Authenticate(AuthenticateRequest model)
         {
-            var user = db.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
+            var user =await  db.GetUserByData(model.Password, model.Username);
+
             // return null if user not found
-            if (user == null) return null;
-            if (user.LoggedIn) return null;
+            if (user == null|| user.LoggedIn) return null;
             
             // authentication successful so generate jwt token
 
             var accessToken = JWTToken.generateAccessJwtToken(user, _appSettings.Secret);
             var refreshToken = JWTToken.generateRefreshJwtToken(user, _appSettings.Secret);
-            user.RequestToken = accessToken;
-            user.RefreshToken = refreshToken;
-            db.SaveChanges();
+            await db.UpdateUserTokensAsync(user.Id, accessToken, refreshToken);
 
             return new AuthenticateResponse (user, accessToken, refreshToken);
         }
 
-        public IEnumerable<User> GetAll()
+        public async Task<IEnumerable<User>> GetAll()
         {
-            return db.Users.ToList();
+            return await db.GetUsers();
         }
 
-        public User GetById(int id)
+        public async Task<User> GetById(int id)
         {
             // return _users.FirstOrDefault(x => x.Id == id);
-            User user = db.Users.Find(id);
+            User user = await db.GetUserByData(id);
             if (user != null)
             {
                 return user;

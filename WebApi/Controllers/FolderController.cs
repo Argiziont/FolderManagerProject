@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
-using FolderProjectApp.Components.HelperComponents;
+﻿using FolderProjectApp.Components.HelperComponents;
 using FolderProjectApp.Hubs;
 using FolderProjectApp.Models;
-using System;
-using System.Collections.Generic;
+using FolderProjectApp.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FolderProjectApp.Controllers
 {
@@ -14,54 +13,79 @@ namespace FolderProjectApp.Controllers
     [Route("[controller]")]
     public class FolderController : ControllerBase
     {
-        private ApplicationDbContext db;
+        private readonly IEFFileFolderContext db;
 
         private readonly IHubContext<FolderHub> _folderHub;
 
-        public FolderController(ApplicationDbContext context, IHubContext<FolderHub> hub)
+        public FolderController(IEFFileFolderContext context, IHubContext<FolderHub> hub)
         {
             db = context;
 
             _folderHub = hub;
         }
+
         [Authorize]
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-
-            return Ok(db.Folders.Select(x => new FolderResponse(x.Id, x.Name, x.Files.Select(u => u.Id).ToList(), x.Files.Select(u => u.Name).ToList() )));
-
-        }
-        [Authorize]
-        [HttpGet("{id}")]
-        public Folder Get(int id)
-        {
-            //
-            return db.Folders.Find(id);
-            // 
-        }
-        [Authorize("Admin")]
-        [HttpPost]
-        public IActionResult PostFolder(Folder folder)
-        {
-
-            db.Folders.Add(folder);
-            db.SaveChanges();
-            return Ok(folder);
-        }
-        [Authorize("Moderator", "Admin")]
-        [HttpDelete("{id}")]
-        public IActionResult DeleteFolder(int id)
-        {
-
-            Folder folder = db.Folders.Find(id);
-            if (folder == null)
+            var folders = await db.GetFolders();
+            if (folders != null)
+            {
+                return Ok(folders.Select(x => new FolderResponse(x.Id, x.Name, x.Files.Select(u => u.Id).ToList(), x.Files.Select(u => u.Name).ToList())));
+            }
+            else
             {
                 return NotFound();
             }
-            db.Folders.Remove(folder);
-            db.SaveChanges();
-            _folderHub.Clients.All.SendAsync("DataUpdate");
+        }
+
+        [Authorize]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var folder = await db.GetFolderByIdAsync(id);
+            if (folder != null)
+            {
+                return Ok(new FolderResponse(folder.Id, folder.Name, folder.Files.Select(u => u.Id).ToList(), folder.Files.Select(u => u.Name).ToList()));
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [Authorize("Moderator")]
+        [HttpPost]
+        public async Task<IActionResult> PostFolder(Folder folder)
+        {
+            IClientProxy hub = _folderHub.Clients.All;
+            if (hub == null) return BadRequest();
+            if (folder == null) return BadRequest();
+
+            await db.AddFolderAsync(folder);
+
+            await hub.SendAsync("DataUpdate");
+
+            return Ok(folder);
+
+        }
+
+        [Authorize("Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFolder(int id)
+        {
+
+            Folder folder = await db.GetFolderByIdAsync(id);
+            IClientProxy hub = _folderHub.Clients.All;
+
+
+            if (folder == null) return NotFound();
+            if (hub == null) return BadRequest();
+
+            await db.RemoveFolderAsync(folder);
+
+            await hub.SendAsync("DataUpdate");
+
             return Ok(folder);
         }
     }

@@ -4,7 +4,7 @@ import { LoginPrivateRoute, HomePrivateRoute } from "../components/routes";
 import { useSnackbar } from "notistack";
 
 import { Layout } from "../Layout";
-import { FolderPage } from "../FolderPage/";
+import { FolderPage } from "../FolderPage";
 import { history } from "../helpers";
 
 import { SignInPage } from "../LoginForm";

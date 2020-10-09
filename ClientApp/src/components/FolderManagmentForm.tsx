@@ -10,16 +10,19 @@ import { IFolderData } from "../helpers";
 import { Box } from "@material-ui/core";
 
 interface FolderManagmentFormProprs {
-  UpdateData: Function;
-  SnackNotification: Function;
+  SnackNotification?: (notification: string[]) => void;
+  handlefolderSubmit?: () => void;
+  handlefolderClick?: () => void;
 }
 export const FolderManagmentForm: React.FC<FolderManagmentFormProprs> = ({
-  UpdateData,
   SnackNotification,
+  handlefolderSubmit,
+  handlefolderClick,
 }) => {
   const { register, handleSubmit, reset, errors } = useForm();
   const onSubmit = (data: IFolderData) => {
-    userActions.addFolders(data, UpdateData, SnackNotification);
+    userActions.addFolders(data, SnackNotification);
+    handlefolderSubmit && handlefolderSubmit();
     reset();
   };
   return (
@@ -40,6 +43,7 @@ export const FolderManagmentForm: React.FC<FolderManagmentFormProprs> = ({
                 name="Name"
                 label="*Folder name"
                 id="Name"
+                data-testid="folder#foldername"
                 inputRef={register({
                   required: true,
                 })}
@@ -47,7 +51,15 @@ export const FolderManagmentForm: React.FC<FolderManagmentFormProprs> = ({
               />
             </Grid>
             <Grid item xs={4}>
-              <Button name="SubmitButton" color="primary" type="submit">
+              <Button
+                name="SubmitButton"
+                color="primary"
+                type="submit"
+                data-testid="folder#submit"
+                onClick={() => {
+                  handlefolderClick && handlefolderClick();
+                }}
+              >
                 Send
               </Button>
             </Grid>

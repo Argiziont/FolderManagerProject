@@ -1,15 +1,19 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using FolderProjectApp.Components.HelperComponents;
 using FolderProjectApp.Hubs;
 using FolderProjectApp.Models;
 using FolderProjectApp.Models.Entity;
 using FolderProjectApp.Services;
 using FolderProjectApp.Services.Interfaces;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using System.Linq;
 
 namespace FolderProjectApp
 {
@@ -34,12 +38,26 @@ namespace FolderProjectApp
             services.AddSignalR();
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-            services.AddScoped<IUserAuthService, UserAuthService>();
 
-            //services.AddSpaStaticFiles(configuration =>
-            //{
-            //    configuration.RootPath = "ClientApp/build";
-            //});
+            services.AddScoped<IUserAuthService, UserAuthService>();
+            services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+            services.AddScoped<IEFFileFolderContext, EFFileFolderContext>();
+            //services.AddScoped<IHubContext<FolderHub>, IBasicHub>();
+            services.AddOpenApiDocument(document =>
+            {
+                document.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    In = OpenApiSecurityApiKeyLocation.Header,
+                    Description = "Type into the textbox: Bearer {your JWT token}."
+                });
+
+                document.OperationProcessors.Add(
+                    new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+                //      new OperationSecurityScopeProcessor("JWT"));
+            });
+
             services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = long.MaxValue;
@@ -53,39 +71,10 @@ namespace FolderProjectApp
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //app.UseRouting();
-
-            //// global cors policy
-            //app.UseCors(x => x
-            //    .AllowAnyOrigin()
-            //    .AllowAnyMethod()
-            //    .AllowAnyHeader());
-            //app.UseHttpsRedirection();
-            //app.UseStaticFiles();
-            //app.UseSpaStaticFiles();
-
-
-            //app.UseMiddleware<JwtMiddleware>();
-
-
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllerRoute(
-            //        name: "default",
-            //        pattern: "{controller}/{action=Index}/{id?}");
-            //    endpoints.MapHub<FolderHub>("/hubs/Folders");
-            //});
-
-
-            //app.UseSpa(spa =>
-            //{
-            //    spa.Options.SourcePath = "ClientApp";
-
-            //    if (env.IsDevelopment())
-            //    {
-            //        spa.UseReactDevelopmentServer(npmScript: "start");
-            //    }
-            //});
+            if (env is null)
+            {
+                throw new System.ArgumentNullException(nameof(env));
+            }
 
             app.UseRouting();
 
@@ -99,6 +88,9 @@ namespace FolderProjectApp
 
             // custom jwt auth middleware
             app.UseMiddleware<JwtMiddleware>();
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseSpa(spa => spa.Options.SourcePath = "ClientApp");
             app.UseEndpoints(endpoints =>

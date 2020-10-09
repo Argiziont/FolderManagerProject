@@ -18,9 +18,9 @@ import ClearIcon from "@material-ui/icons/Clear";
 import AddIcon from "@material-ui/icons/Add";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-
+//Due to progress bar//import Typography from "@material-ui/core/Typography";
+//Due to progress bar//import Box from "@material-ui/core/Box";
+import { IFolder } from "../helpers/IFolder";
 import { userActions } from "../actions";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,46 +39,38 @@ interface CircularProgressWithLabelProps {
   value: number;
 }
 
-function CircularProgressWithLabel(props: CircularProgressWithLabelProps) {
-  return (
-    <Box position="relative" display="inline-flex">
-      <CircularProgress variant="static" {...props} />
-      <Box
-        top={0}
-        left={0}
-        bottom={0}
-        right={0}
-        position="absolute"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Typography
-          variant="caption"
-          component="div"
-          color="textSecondary"
-        >{`${Math.round(props.value)}%`}</Typography>
-      </Box>
-    </Box>
-  );
-}
+//Due to progress bar// function CircularProgressWithLabel(props: CircularProgressWithLabelProps) {
+//   return (
+//     <Box position="relative" display="inline-flex">
+//       <CircularProgress variant="static" {...props} />
+//       <Box
+//         top={0}
+//         left={0}
+//         bottom={0}
+//         right={0}
+//         position="absolute"
+//         display="flex"
+//         alignItems="center"
+//         justifyContent="center"
+//       >
+//         <Typography
+//           variant="caption"
+//           component="div"
+//           color="textSecondary"
+//         >{`${Math.round(props.value)}%`}</Typography>
+//       </Box>
+//     </Box>
+//   );
+// }
 
 interface InteractiveListProprs {
-  FolderName: string;
-  FolderId: number;
-  FilesNamesArray: string[];
-  FilesIdsArray: number[];
-  UpdateHandler: Function;
-  SnackCallback: Function;
-  DeleteHandler: Function;
+  folder: IFolder;
+  SnackCallback?: Function;
+  DeleteHandler?: Function;
 }
 export const InteractiveList: React.FC<InteractiveListProprs> = ({
-  FolderName,
-  FolderId,
-  FilesNamesArray,
+  folder,
   DeleteHandler,
-  UpdateHandler,
-  FilesIdsArray,
   SnackCallback,
 }) => {
   const classes = useStyles();
@@ -88,19 +80,21 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
   const handleClick = () => {
     setOpen(!open);
   };
-  const handleUpdate = (event: React.FormEvent<HTMLInputElement>) => {
+  const handleUpload = (event: React.FormEvent<HTMLInputElement>) => {
     const formData = new FormData();
     const file = (event.target as HTMLInputElement).files;
     if (file) {
       formData.append("sendFile", file[0], file[0].name);
+
       // Details of the uploaded file
-      formData.append("Id", FolderId.toString());
+      formData.append("Id", folder.folderId.toString());
+
       // Request made to the backend api
       // Send formData object
 
       userActions.uploadFile(formData, setprogressPercent).then((response) => {
-        UpdateHandler();
-        SnackCallback(["File successfully uploaded", "success", "Success"]);
+        SnackCallback &&
+          SnackCallback(["File successfully uploaded", "success", "Success"]);
       });
     }
   };
@@ -117,11 +111,12 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
                     <FolderIcon color="primary" />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={FolderName} />
+                <ListItemText primary={folder.folderName} />
                 <ListItemSecondaryAction>
                   {progressPercent > 0 && progressPercent !== 100 ? (
                     <IconButton>
-                      <CircularProgressWithLabel value={progressPercent} />
+                      {/*//Due to progress bar <CircularProgressWithLabel value={progressPercent} /> */}
+                      <CircularProgress />
                     </IconButton>
                   ) : (
                     <Button
@@ -130,15 +125,15 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
                       startIcon={<AddIcon />}
                     >
                       <input
-                        onChange={handleUpdate}
-                        onClick={() => UpdateHandler()}
+                        onChange={handleUpload}
                         type="file"
                         className={classes.input}
+                        data-testid="upload"
                       />
                     </Button>
                   )}
 
-                  {FilesNamesArray != null && FilesNamesArray.length > 0 ? (
+                  {folder.filesNames != null && folder.filesNames.length > 0 ? (
                     <IconButton onClick={handleClick} aria-label="expand">
                       {open ? <ExpandLess /> : <ExpandMore />}
                     </IconButton>
@@ -148,9 +143,18 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
                     </IconButton>
                   )}
                   <IconButton
-                    onClick={() => DeleteHandler()}
+                    onClick={() => {
+                      DeleteHandler && DeleteHandler();
+                      SnackCallback &&
+                        SnackCallback([
+                          "File was deleted",
+                          "warning",
+                          "Warning",
+                        ]);
+                    }}
                     edge="end"
                     aria-label="delete"
+                    data-testid="delete"
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -160,9 +164,8 @@ export const InteractiveList: React.FC<InteractiveListProprs> = ({
                 <List component="div" disablePadding>
                   <ListItem>
                     <FilesList
-                      FilesNamesArray={FilesNamesArray}
-                      UpdateHandler={UpdateHandler}
-                      FilesIdsArray={FilesIdsArray}
+                      FilesNamesArray={folder.filesNames}
+                      FilesIdsArray={folder.filesIds}
                       SnackCallback={SnackCallback}
                     ></FilesList>
                   </ListItem>

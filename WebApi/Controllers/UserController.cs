@@ -13,7 +13,7 @@ namespace FolderProjectApp.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private IUserAuthService _userService;
+        private readonly IUserAuthService _userService;
 
         public UserController(IUserAuthService userService)
         {
@@ -21,9 +21,9 @@ namespace FolderProjectApp.Controllers
         }
 
         [HttpPost("authenticate")]
-        public IActionResult Authenticate(AuthenticateRequest model)
+        public async Task<IActionResult> Authenticate(AuthenticateRequest model)
         { 
-            AuthenticateResponse response = _userService.Authenticate(model);
+            AuthenticateResponse response = await _userService.Authenticate(model);
 
             if (response == null)
                 return BadRequest(new { message = "Username or password is incorrect " });
@@ -33,10 +33,10 @@ namespace FolderProjectApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var users = _userService.GetAll();
-            return Ok(users);
+            var users = await _userService.GetAll();
+            return  Ok(users);
         }
     }
 }

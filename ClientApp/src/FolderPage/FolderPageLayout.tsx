@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useSignalr } from "@known-as-bmf/react-signalr";
 import { debounceTime } from "rxjs/operators";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { FolderManagmentForm } from "../components";
 import { userActions } from "../actions";
 import { ApiUrl, IFolder } from "../helpers";
 import { FoldersTable } from "./FoldersTable";
+import { Box } from "@material-ui/core";
 
 interface FolderPageLayoutProps {
-  SnackCallback(notiInfo: string[]): void;
-  setConnectedState(connected: boolean): void;
+  SnackCallback?(notiInfo: string[]): void;
+  setConnectedState?(connected: boolean): void;
 }
 
 export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
@@ -21,7 +23,8 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
       setFolders(data);
       setLoading(false);
       setAutorized(true);
-    });
+    })
+    return folders;
   };
 
   const signalrEndpoint =
@@ -48,8 +51,8 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
         if (!cleanupFunction) {
           userActions.logout();
           setConnected(false);
-          setConnectedState(false);
-          SnackCallback([
+          setConnectedState&&setConnectedState(false);
+          SnackCallback&&SnackCallback([
             "Server is full, sorry, you are disconnected",
             "error",
             "Error",
@@ -61,7 +64,7 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
       .subscribe(() => {
         if (!cleanupFunction) {
           setConnected(true);
-          setConnectedState(true);
+          setConnectedState&&setConnectedState(true);
         }
       });
     const disconnectSub = on<any>("Disconnection")
@@ -69,7 +72,7 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
       .subscribe(() => {
         if (!cleanupFunction) {
           setConnected(false);
-          setConnectedState(false);
+          setConnectedState&&setConnectedState(false);
           setAutorized(false);
         }
       });
@@ -86,20 +89,20 @@ export const FolderPageLayout: React.FC<FolderPageLayoutProps> = ({
   return (
     <div>
       {!connected || loading || !autorized ? (
-        <p> Loading... </p>
+        <Box alignItems="center" justifyContent="center">
+          <CircularProgress />
+        </Box>
       ) : (
         <>
           <h1> Folders List </h1>
 
-          <FoldersTable
-            folders={folders}
-            UpdateFoldedData={updateData}
-            SnackCallback={SnackCallback}
-          ></FoldersTable>
-          <FolderManagmentForm
-            UpdateData={() => updateData()}
-            SnackNotification={SnackCallback}
-          />
+          {folders && (
+            <FoldersTable
+              folders={folders}
+              SnackCallback={SnackCallback}
+            ></FoldersTable>
+          )}
+          <FolderManagmentForm SnackNotification={SnackCallback} />
         </>
       )}
     </div>

@@ -13,35 +13,33 @@ namespace FolderProjectApp.Components.HelperComponents
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeAttribute : Attribute, IAuthorizationFilter
     {
-        private string[] userRoles { get; set; }
-        public AuthorizeAttribute(params string[] roles)
+        public string Roles { get; set; }
+        public AuthorizeAttribute(string role) : base()
         {
-            userRoles = roles;
+            Roles = role;
         }
-        public AuthorizeAttribute()
+        public AuthorizeAttribute() : base()
         { }
-        public void OnAuthorization(AuthorizationFilterContext context)
+        public  void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (User)context.HttpContext.Items[nameof(User)];
-            if (user == null)
+            if (!(context.HttpContext.Items[nameof(User)] is Task<User> userTask))
             {
                 // not logged in
 
                 context.Result = new JsonResult(new { StatusText = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
             }
-            else if (user.Role != null&& userRoles!=null)
+            else
             {
-                //Role check
-                var results= Array.FindAll(userRoles, s => s.Equals(user.Role));
-                 
-                if (results.Length==0)
+                userTask.Wait();
+                User user = userTask.Result;
+                if (user.Role != null && Roles != null)
                 {
-                    context.Result = new JsonResult(new { StatusText = "Permission denied" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                    if (user.Role != "Admin" && user.Role != Roles)
+                    {
+                        context.Result = new JsonResult(new { StatusText = "Permission denied" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                    }
                 }
-
             }
         }
-
-
     }
 }

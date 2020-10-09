@@ -8,8 +8,8 @@ namespace FolderProjectApp.Services.Interfaces
 {
     public interface IUserAuthService
     {
-        AuthenticateResponse Authenticate(AuthenticateRequest model);
-        IEnumerable<User> GetAll();
-        User GetById(int id);
+        public Task<AuthenticateResponse> Authenticate(AuthenticateRequest model);
+        public Task<IEnumerable<User>> GetAll();
+        public Task<User> GetById(int id);
     }
 }

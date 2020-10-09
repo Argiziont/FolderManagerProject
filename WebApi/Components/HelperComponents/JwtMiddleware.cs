@@ -29,12 +29,12 @@ namespace FolderProjectApp.Components.HelperComponents
             var refreshToken = context.Request.Headers["Refresh"].FirstOrDefault()?.Split(" ").Last();
 
             if (accessToken != null)
-                attachUserToContext(context, userService, accessToken, refreshToken);
+                AttachUserToContext(context, userService, accessToken, refreshToken);
 
             await _next(context);
         }
 
-        private void attachUserToContext(HttpContext context, IUserAuthService userService, string accessToken, string refreshToken)
+        private void AttachUserToContext(HttpContext context, IUserAuthService userService, string accessToken, string refreshToken)
         {
             try
             {

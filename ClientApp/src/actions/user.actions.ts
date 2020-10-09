@@ -1,7 +1,8 @@
 import { history } from "../helpers/history";
 
-import { userService } from "../services";
 import { IFolderData } from "../helpers";
+import { userService } from "../services";
+
 export const userActions = {
   login,
   logout,
@@ -17,20 +18,22 @@ export const userActions = {
 function login(
   username: string,
   password: string,
-  SnackNotification: Function
+  SnackNotification?: Function
 ) {
   return userService.login(username, password).then(
     (user) => {
-      SnackNotification(["Successfully logged in", "success", "Success"]);
+      SnackNotification &&
+        SnackNotification(["Successfully logged in", "success", "Success"]);
       history.push("/");
       return user;
     },
     (error) => {
-      SnackNotification([
-        "Username or password is incorrect or user already logged in",
-        "error",
-        "Error",
-      ]);
+      SnackNotification &&
+        SnackNotification([
+          "Username or password is incorrect or user already logged in",
+          "error",
+          "Error",
+        ]);
       return error;
     }
   );
@@ -59,59 +62,54 @@ function loadFolders() {
     }
   );
 }
-function addFolders(
-  data: IFolderData,
-  UpdateData: Function,
-  SnackNotification: Function
-) {
-  return userService.addFolders(data, UpdateData).then(
+function addFolders(data: IFolderData, SnackNotification?: Function) {
+  return userService.addFolders(data).then(
     (folder) => {
-      SnackNotification(["Folder successfully added", "success", "Success"]);
+      SnackNotification &&
+        SnackNotification(["Folder successfully added", "success", "Success"]);
       return folder;
     },
     (error) => {
-      SnackNotification([error, "error", "Error"]);
+      SnackNotification && SnackNotification([error, "error", "Error"]);
       return error;
     }
   );
 }
-function deleteFile(
-  id: number,
-  UpdateData: Function,
-  SnackNotification: Function
-) {
-  return userService.deleteFile(id, UpdateData).then(
+function deleteFile(id: number, SnackNotification?: Function) {
+  return userService.deleteFile(id).then(
     (file) => {
-      SnackNotification(["File successfully deleted", "warning", "Warning"]);
+      SnackNotification &&
+        SnackNotification(["File successfully deleted", "warning", "Warning"]);
       return file;
     },
     (error) => {
-      SnackNotification([error, "error", "Error"]);
+      SnackNotification && SnackNotification([error, "error", "Error"]);
       return error;
     }
   );
 }
-function deleteFolder(
-  id: number | string,
-  UpdateData: Function,
-  SnackNotification: Function
-) {
+function deleteFolder(id: number | string, SnackNotification?: Function) {
   if (typeof id === "string") {
     id = +id;
   }
-  return userService.deleteFolder(id, UpdateData).then(
+  return userService.deleteFolder(id).then(
     (folder) => {
-      SnackNotification(["Folder successfully deleted", "warning", "Warning"]);
+      SnackNotification &&
+        SnackNotification([
+          "Folder successfully deleted",
+          "warning",
+          "Warning",
+        ]);
       return folder;
     },
     (error) => {
-      SnackNotification([error, "error", "Error"]);
+      SnackNotification && SnackNotification([error, "error", "Error"]);
       return error;
     }
   );
 }
-function downloadFile(index: number) {
-  return userService.downloadFile(index).then(
+function downloadFile(id: number) {
+  return userService.downloadFile(id).then(
     (file) => {
       return file;
     },

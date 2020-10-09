@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace FolderProjectApp
 {
@@ -17,11 +11,15 @@ namespace FolderProjectApp
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>()
-                        .UseUrls("http://localhost:4000");
-                });
+         Host.CreateDefaultBuilder(args)
+          .ConfigureWebHostDefaults(webBuilder =>
+          {
+              webBuilder.ConfigureKestrel((context, options) =>
+              {
+                  options.Limits.MaxRequestBodySize = 737280000;
+              });
+              webBuilder.UseStartup<Startup>()
+                  .UseUrls("http://localhost:4000");
+          });
     }
 }

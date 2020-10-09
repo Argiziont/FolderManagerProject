@@ -36,12 +36,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface SignInPageProps {
-  SnackCallback(notiInfo: string[]): void;
-  setConnected(connected: boolean): void;
+  SnackCallback?(notiInfo: string[]): void;
+  SubmitCallback?: Function;
 }
 export const SignInPage: React.FC<SignInPageProps> = ({
   SnackCallback,
-  setConnected,
+  SubmitCallback,
 }) => {
   const classes = useStyles();
   const { register, handleSubmit, control, errors } = useForm();
@@ -74,6 +74,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             fullWidth
             name="username"
             label="Username"
+            data-testid="singin#username"
             id="username"
             type="text"
             autoComplete="name"
@@ -89,6 +90,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({
             fullWidth
             name="password"
             label="Password"
+            data-testid="singin#password"
             id="password"
             type="password"
             autoComplete="current-password"
@@ -108,9 +110,13 @@ export const SignInPage: React.FC<SignInPageProps> = ({
           />
           <Button
             type="submit"
+            data-testid="singin#submit"
             fullWidth
             variant="contained"
             className={classes.submit}
+            onClick={() => {
+              SubmitCallback && SubmitCallback();
+            }}
           >
             Sign In
           </Button>

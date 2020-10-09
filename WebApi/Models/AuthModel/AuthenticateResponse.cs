@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace FolderProjectApp.Models.AuthModel
+﻿namespace FolderProjectApp.Models.AuthModel
 {
     public class AuthenticateResponse
     {
@@ -14,7 +9,7 @@ namespace FolderProjectApp.Models.AuthModel
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
 
-        public AuthenticateResponse(User user, string access,string refresh)
+        public AuthenticateResponse(User user, string access, string refresh)
         {
             Id = user.Id;
             Role = user.Role;
@@ -23,5 +18,6 @@ namespace FolderProjectApp.Models.AuthModel
             AccessToken = access;
             RefreshToken = refresh;
         }
+        public AuthenticateResponse() { }
     }
 }

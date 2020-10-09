@@ -6,29 +6,28 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using FolderProjectApp.Models;
 using FolderProjectApp.Models.AuthModel;
+using FolderProjectApp.Services.Interfaces;
 
 namespace FolderProjectApp.Hubs
 {
     public class FolderHub : Hub
     {
-        private static int usersCount { get; set; } = 0;
+        private static int UsersCount { get; set; } = 0;
 
-        private ApplicationDbContext db;
-        public FolderHub( ApplicationDbContext context)
+        private readonly IEFFileFolderContext db;
+        public FolderHub(IEFFileFolderContext context)
         {
             db = context;
         }
         public override async Task OnConnectedAsync()
         {
-            usersCount++;
-            string token = getToken(Context.GetHttpContext());
+            UsersCount++;
+            string token = GetToken(Context.GetHttpContext());
 
-            User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
-            user.LoggedIn = true;
-            db.SaveChanges();
-            var z = Context.ConnectionId;
+            await db.UpdateLoginStateAsync(token, true);
+            //var z = Context.ConnectionId;
 
-            if (usersCount >= 3)
+            if (UsersCount >= 3)
             {
                 await Clients.Caller.SendAsync("Overload");
             }
@@ -42,21 +41,20 @@ namespace FolderProjectApp.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            usersCount--;
-            string token = getToken(Context.GetHttpContext());
+            UsersCount--;
+            string token = GetToken(Context.GetHttpContext());
             await Clients.Caller.SendAsync("Disconnection");
-            User user = db.Users.SingleOrDefault(x => x.RequestToken == token);
-            user.LoggedIn = false;
-            db.SaveChanges();
+            await db.UpdateLoginStateAsync(token, false);
 
             Context.Abort();
             await base.OnDisconnectedAsync(exception);
         }
 
-        private string getToken(HttpContext context)
+
+        private string GetToken(HttpContext context)
         {
             string token = context.Request.Query["Token"].ToList()[0];
-            return token.Substring(1, token.Length - 2);
+            return token[1..^1];
         }
     }
 }
